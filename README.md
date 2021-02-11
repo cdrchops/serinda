@@ -5,11 +5,17 @@ Mixed Reality Intelligent Personal Assistant using Python3, Flask, HTML/CSS/JS, 
 
 ---
 #How To Startup SERINDA
-python3 app.py --ip 0.0.0.0 --port 8000 
-or
+I still have some work to do with the installers and requirements.txt - aka merging the two together.  There are libraries
+that will be needed for Mac and Linux variants.  There are some notes in the installers/python3Installs.sh file.  You will
+need to install OpenCV.
+
+
+
 python3 startup.py
 
 when running startup.py the server will start up in the terminal and open the url in an instance of chrome.  Then the page will keep attempting to connect until it can connect to the server
+
+
 
 ---
 #Wiki
