@@ -1,7 +1,5 @@
 from serinda.plugin.OpenCVPlugin.filters.GridFilter import GridFilter
 from serinda.plugin.OpenCVPlugin.filters.TimestampDisplayFilter import TimestampDisplayFilter
-from serinda.plugin.OpenCVPlugin.old.MotionDetector import MotionDetector
-from serinda.plugin.OpenCVPlugin.old.TrackObjectByGridPoints import TrackObjectByGridPoints
 from serinda.plugin.OpenCVPlugin.filters.barcodedetect import BarcodeDetect
 from serinda.plugin.OpenCVPlugin.filters.facedetection import FaceDetection
 import cv2
@@ -37,8 +35,6 @@ class OpenCVPlugin:
 
         if params['writeToFile']:
             self.out.write(frame)
-
-        MotionDetector(params).processFilter(frame, params)
 
         return frame
 
