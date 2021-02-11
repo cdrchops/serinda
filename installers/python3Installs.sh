@@ -9,10 +9,6 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 pip3 install setuptools_rust
 
-pip3 install snips_nlu
-
-#install en language pack
-python3 -m snips_nlu download en
 pip3 install SpeechRecognition
 pip3 install textblob
 pip3 install googletrans
@@ -28,7 +24,6 @@ pip3 install jpype1
 #https://nlu.johnsnowlabs.com/
 #pip3 install nlu
 #pip3 install pyspark==2.4.7
-
 
 pip3 install pandas
 pip3 install seaborn
@@ -86,19 +81,22 @@ pip3 install opencv-contrib-python # ==4.1.0.25  >= 4.1.0.25
 pip3 install sklearn
 pip3 install imutils
 
-sudo apt-get install -y build-essential cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
-git clone https://github.com/opencv/opencv.git
-cd ..
-mkdir build
-cd build
-cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D WITH_GSTREAMER=ON -D WITH_FFMPEG=ON ../opencv
-make -j8
-sudo make install
+#non-windows installs that may be needed
+#sudo apt-get install -y build-essential cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
+#git clone https://github.com/opencv/opencv.git
+#cd ..
+#mkdir build
+#cd build
+#cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D WITH_GSTREAMER=ON -D WITH_FFMPEG=ON ../opencv
+#make -j8
+#sudo make install
 
-#pip3 install --user flask-cors
-#pip3 install --user pyzbar
+#NLU - rhasspy is preferred over snips
+pip3 install snips_nlu
 
-# use snips or rhasspy for NLU
+#install en language pack
+python3 -m snips_nlu download en
+
 # rhasspy uses JSGF where snips has it's own
 # also available for NLU is alter NLU engine which has it's own server - I have chosen not to use it because of the additional server running
 pip3 install rhasspy-nlu
