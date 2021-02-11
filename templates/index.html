@@ -10,8 +10,8 @@
 {#    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>#}
 
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
-    <link rel="stylesheet" href="/static/hamburger2.css">
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='hamburger2.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style2.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <script src="{{ url_for('static', filename='tmp/three.js.download') }}"></script>
