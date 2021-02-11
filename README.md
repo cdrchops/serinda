@@ -2,6 +2,8 @@
 Sophisticated Engaging Rider Interface Near-eye Digital Assistant or SERINDA.<br/><br/>
 It's a Mixed Reality Intelligent Personal Assistant using Python3, Flask, HTML/CSS/JS, and OpenCV.  It was originally supposed to be for HMD on a motorcycle.  It is now, more of an HMD for daily life.
 
+I have not tried this with Project North Star.  I have used this on Mad Gaze Glow and my own headset.
+
 ---
 <h2>How To Startup SERINDA</h2>
 I still have some work to do with the installers and requirements.txt - aka merging the two together.  There are libraries
