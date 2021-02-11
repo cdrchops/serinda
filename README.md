@@ -1,7 +1,5 @@
 <h2>What is SERINDA?</h2>
-Sophisticated Engaging Rider Interface Near-eye Digital Assistant or SERINDA.
-
-
+Sophisticated Engaging Rider Interface Near-eye Digital Assistant or SERINDA.<br/><br/>
 It's a Mixed Reality Intelligent Personal Assistant using Python3, Flask, HTML/CSS/JS, and OpenCV.  It was originally supposed to be for HMD on a motorcycle.  It is now, more of an HMD for daily life.
 
 ---
