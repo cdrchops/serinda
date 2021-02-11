@@ -1,0 +1,118 @@
+<script type="text/javascript">
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+
+    var synth = window.speechSynthesis;
+    var thisVoice;
+    var spanishVoice;
+
+    //todo - adjust voice so that it speaks spanish well
+    //fix from https://stackoverflow.com/questions/62892023/why-speechsynthesis-getvoices-in-google-chrome-returns-an-empty-list
+    //this fixes the chrome loading voices issue
+    synth.addEventListener("voiceschanged", () => {
+        const voices = synth.getVoices()
+        voices.forEach(function (voice, index) {
+            {#console.log("voice is " + voice.name + " " + JSON.stringify(voice));#}
+            if (voice.name === "Google UK English Female") {
+                thisVoice = voice;
+                {#console.log('this voice is set');#}
+            } else if (voice.name === 'Google español de Estados Unidos') {
+                spanishVoice = voice;
+                {#console.log('spanish voice is set');#}
+            }
+        });
+    });
+
+    var overlay = document.getElementById("overlay");
+
+    var r = document.getElementById('bob');
+
+    function speakSpanish(text) {
+        speak(text, spanishVoice);
+    }
+
+    function speakEnglish(text) {
+        speak(text, thisVoice);
+    }
+
+    function speak(text, voice) {
+        var utterThis = new SpeechSynthesisUtterance(text);
+        utterThis.pitch = 1;
+        utterThis.rate = 1;
+        utterThis.voice = voice;
+        synth.speak(utterThis);
+    }
+
+    $(document).on("clickMenuItem", {
+        pappy: 'gunstar'//and deathblossoms house
+    }, function (event, arg1, arg2) {
+        if (arg2 === 'clickA') {
+            $('#' + arg1).get(0).click();
+        } else if (arg2 === 'click') {
+            $('#' + arg1).click();
+        } else if (arg2 === 'show') {
+            $('#' + arg1).show();
+        } else if (arg2 === 'hide') {
+            $('#' + arg1).hide();
+        }
+    });
+
+    //https://stackoverflow.com/questions/12232304/how-to-implement-server-push-in-flask-framework
+    // see also the flask implementation of /stream
+    var targetContainer = document.getElementById("target_div");
+    var eventSource = new EventSource("/stream")
+      eventSource.onmessage = function(e) {
+        var dataReturned = e.data;
+        var lang = dataReturned.substring("lang=".length, dataReturned.indexOf(", text=")).trim();
+        var text = dataReturned.substring(dataReturned.indexOf("text=") + 5).trim();
+        if (lang === "en") {
+            speakEnglish(text);
+         } else {
+            speakSpanish(text);
+         }
+
+        targetContainer.innerHTML = text;//"language = " + lang + " text is " + text;
+    };
+
+    var messageContainer = document.getElementById("messageContainer_div");
+    var listenSource = new EventSource("/listen")
+    listenSource.onmessage = function(e) {
+        var dataReturned = e.data;
+        var text = dataReturned.substring(dataReturned.indexOf("text=") + 5).trim();
+        var jsonText = JSON.parse(text);
+        var gyrox = jsonText.gyrox;
+        var gyroy = jsonText.gyroy;
+        var gyroz = jsonText.gyroz;
+
+        gyrox = gyrox/100;// * -1; // coordinate system Left or Right handed?
+        gyroy = 0;//gyroy/25*-1;
+        {#gyroz = gyroz/50;///100;// * -1;#}
+
+        var accelx = jsonText.accelx;
+        var accely = jsonText.accely;
+        var accelz = jsonText.accelz / 20;
+
+        var magx = jsonText.magx;
+        var magy = jsonText.magy;
+        var magz = jsonText.magz;
+
+        moveX(gyrox, gyroy, 0);
+
+        messageContainer.innerHTML = text;
+    };
+
+    function callCommandProcessor(command) {
+        if (command !== 'menu') {
+            $(function () {
+                $.getJSON($SCRIPT_ROOT + '/cmd', {
+                    command: command
+                }, function (data) {
+                    $('#successFail').text(data.result);
+                    $('#bob').val(command);
+                });
+            });
+        } else {
+            $('#navcheck').click();
+        }
+    }
+</script>
+

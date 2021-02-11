@@ -1,0 +1,18 @@
+{#<div id="pdfViewer">#}
+{#    <object data="{{ url_for('static', filename='pdf/chessTex.pdf')}}" type="application/pdf" style="min-height:100vh;width:100%"></object>#}
+{#</div>#}
+
+{# figure out why the dom isn't loaded#}
+{#Uncaught (in promise) Error: The DOM is not ready yet. Please call tf.fromPixels() once the DOM is ready. One way to do that is to add an event listener for `DOMContentLoaded` on the document object#}
+{#<video id="video" hidden></video>#}
+{#<canvas id="hcanvas" hidden></canvas>#}
+{#<script>#}
+{#    function loadScripts() {#}
+{#        document.write('<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.1.266/build/pdf.min.js">\x3C/script>');#}
+{#        document.write('<script src="https://cdn.jsdelivr.net/npm/handtrackjs@0.0.13/dist/handtrack.min.js">\x3C/script>');#}
+{#        document.write('<script src="{{ url_for('static', filename='app.js') }}">\x3C/script>');#}
+{#console.log('DOM fully loaded and parsed');#}
+{#    }#}
+{##}
+{#    document.addEventListener('DOMContentLoaded', loadScripts());#}
+{#</script>#}

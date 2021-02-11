@@ -1,0 +1,86 @@
+---
+type: intent
+name: showGrid
+slots:
+  - name: cameraNumber
+    entity: snips/number
+utterances:
+  - show grid
+  - display grid
+  - show grid on camera [cameraNumber](0)
+  - display grid on camera [cameraNumber](0)
+
+---
+type: intent
+name: hideGrid
+utterances:
+  - hide grid
+  - hide grid on camera [cameraNumber](0)
+
+---
+type: intent
+name: detectBarcode
+utterances:
+  - detect barcode
+  - scan barcode
+  - qr code
+
+---
+type: intent
+name: detectMotion
+utterances:
+  - detect motion
+
+---
+type: intent
+name: faceDetect
+utterances:
+  - detect faces
+  - face detection
+  - find faces
+
+---
+type: intent
+name: timestamp
+utterances:
+  - show timestamp
+  - display timestamp
+  - show time
+  - display time
+
+---
+type: intent
+name: timestamp
+utterances:
+  - hide timestamp
+  - hide time
+
+---
+type: intent
+name: recordVideo
+utterances:
+  - record video
+
+#    self.writeToFile = False
+# show and hide video
+# add support to say detect faces on camera 1
+
+---
+type: intent
+name: setGridSquare
+utterances:
+  - record video
+
+---
+type: intent
+name: trackObjectByGrid
+slots:
+  - name: originX
+    entity: snips/number
+  - name: originY
+    entity: snips/number
+  - name: sizeOfArea
+    entity: snips/number
+utterances:
+  - track object at [originX](150) and [originY](150) by [sizeOfArea](50)
+

@@ -1,0 +1,14 @@
+<input type="checkbox" id="navcheck" role="button" title="menu" style="opacity: 0;position: fixed;">
+<label for="navcheck" aria-hidden="true" title="menu">
+      <span class="burger">
+          <span class="bar">
+              <span class="visuallyhidden">Menu</span>
+          </span>
+      </span>
+</label>
+<nav id="menu">
+{#    <a href="#" style="color:white" onclick="callCommandProcessor('menu'); callCommandProcessor('menu');">Menu</a>#}
+    {% for item in menuList %}
+        {% include item %}
+    {% endfor %}
+</nav>

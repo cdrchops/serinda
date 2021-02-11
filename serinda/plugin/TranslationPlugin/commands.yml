@@ -1,0 +1,14 @@
+# todo - make some kind of language entity to be used in phrases
+---
+type: intent
+name: translateToEnglish
+utterances:
+  - translate to english
+  - translate english
+
+---
+type: intent
+name: translateToSpanish
+utterances:
+  - translate to spanish
+  - translate spanish

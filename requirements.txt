@@ -1,0 +1,15 @@
+flask~=1.1.2
+nlu~=1.0.5
+numpy~=1.19.4
+pywinauto~=0.6.8
+matplotlib~=3.3.3
+pyttsx3~=2.90
+autoscraper~=1.1.10
+Jinja2~=2.11.2
+jprops~=2.0.2
+imutils~=0.5.3
+dlib~=19.21.1
+pyzbar~=0.1.8
+textblob~=0.15.3
+googletrans~=3.0.0
+PyAutoGUI~=0.9.50
