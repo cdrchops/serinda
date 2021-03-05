@@ -1,0 +1,188 @@
+<html>
+<head>
+    <script src="/static/ogvocl/three.min.js"></script>
+    <script src="{{ url_for('static', filename='tmp/leap-0.6.4.js.download') }}"></script>
+    <script src="{{ url_for('static', filename='/tmp/leap-plugins-0.1.11pre.js.download') }}"></script>
+    <script src="{{ url_for('static', filename='/tmp/leap-widgets-0.1.0.js.download') }}"></script>
+    <script src="{{ url_for('static', filename='/tmp/OrbitControls.js.download') }}"></script>
+    <script src="{{ url_for('static', filename='/leap/LeapCameraControls.js') }}"></script>
+    <script src="{{ url_for('static', filename='/leap/LeapObjectControls.js') }}"></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="/static/ogvocl/util.js"></script>
+    <script async src="/static/ogvocl/opencv.js"></script>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        section {
+            margin: 100px auto;
+        }
+
+        section div:first-child {
+            margin: auto;
+            width: 80vw;
+        }
+
+        .intro h1 {
+            text-align: center;
+        }
+
+        .intro img {
+            display: block;
+            margin: auto;
+        }
+
+        .arDemo .arDemoInnerFirst {
+            margin-bottom: 50px;
+        }
+
+        #aruco {
+            display: none;
+        }
+
+        .leap-boneHand {
+            position: absolute;
+            top: 100px;
+            left: 100px;
+            width: 800px;
+            height: 600px;
+        }
+    </style>
+</head>
+
+<body>
+
+        <div>
+            <p id="ready">Opencv Loading...</p>
+            <div class="arDemoInnerFirst">
+                <button id="front-button" style="display: inline-block" disabled>Front Camera</button>
+                <button id="back-button" style="display: inline-block" disabled>Back Camera</button>
+                <button id="demo-button" style="display: inline-block" disabled>Run Demo</button>
+            </div>
+            <div class="arDemoInnerSecond">
+
+                <video id="video" width="800" height="600"></video>
+                <canvas id="aruco" width="800" height="600"></canvas>
+            </div>
+        </div>
+</body>
+<script>
+
+    // Set up plugins
+    Leap.loop({background: true})
+        .use('transform', {
+            vr: true//'desktop' // Switch to meters. true = optimized for head
+        })
+        .use('boneHand', {
+            targetEl: document.body,
+            jointColor: new THREE.Color(0xffffff),
+            rendererOps: {antialias: true}
+        })
+        .use('proximity');
+
+    var video = document.getElementById('video');
+    var frontButton = document.getElementById('front-button');
+    var backButton = document.getElementById('back-button');
+    var demoButton = document.getElementById('demo-button')
+    video.style.display = "none";
+
+    render = function (video) {
+
+        var texture = new THREE.VideoTexture(video);
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        texture.format = THREE.RGBFormat;
+        texture.needsUpdate = true;
+
+        var renderer = new THREE.WebGLRenderer();
+        renderer.setSize(
+            800,
+            600
+        );
+        document.getElementsByClassName('arDemoInnerSecond')[0].appendChild(renderer.domElement);
+
+        var videoGeometry = new THREE.BoxGeometry(7, 2.75, 4);
+        var cubeGeometry = new THREE.BoxGeometry(2, 1, 5);
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera(
+            49,
+            2.54,
+            0.1,
+            1000
+        );
+
+        var videoMaterial = new THREE.MeshBasicMaterial({ map: texture });
+        var cubeMaterial = [
+            new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0 }),
+            new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0 }),
+            new THREE.MeshBasicMaterial({ color: 0x0000ff, transparent: true, opacity: 0 }),
+            new THREE.MeshBasicMaterial({ color: 0xffff00, transparent: true, opacity: 0 }),
+            new THREE.MeshBasicMaterial({ color: 0xff00ff, transparent: true, opacity: 0 }),
+            new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0 })
+        ]
+
+        var videoThreeJs = new THREE.Mesh(videoGeometry, videoMaterial);
+        var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+        scene.add(videoThreeJs);
+        scene.add(cube);
+
+        camera.position.z = 5;
+
+
+        // Apply aruco coordinates to cube vertices
+        runAruco(scene, camera, renderer, cubeGeometry, cubeMaterial);
+    }
+
+    frontButton.onclick = function () {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false })
+            .then(function (stream) {
+                video.srcObject = stream;
+                video.play();
+                demoButton.disabled = false;
+            })
+            .catch(function (err) {
+                console.log("An error occurred! " + err);
+            });
+
+        frontButton.disabled = true;
+        backButton.disabled = true;
+    }
+    backButton.onclick = function () {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
+            .then(function (stream) {
+                video.srcObject = stream;
+                video.play();
+                demoButton.disabled = false;
+            })
+            .catch(function (err) {
+                console.log("An error occurred! " + err);
+            });
+
+        frontButton.disabled = true;
+        backButton.disabled = true;
+    }
+
+    demoButton.onclick = function () {
+        demoButton.disabled = true;
+        render(video);
+    }
+
+    var checkOpencv = setInterval(function () {
+        if (cv.usingWasm) {
+            var script = document.createElement('script');
+            script.src = "/static/ogvocl/aruco-video.js";
+            document.body.appendChild(script);
+            frontButton.disabled = false;
+            backButton.disabled = false;
+            document.getElementById('ready').innerText = 'OpenCV is ready';
+            clearInterval(checkOpencv);
+        }
+    }, 500);
+</script>
+
+</html>

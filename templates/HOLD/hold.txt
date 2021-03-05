@@ -1,0 +1,346 @@
+var scriptGUI = document.createElement("script");
+scriptGUI.id = "CASTORGUI";
+scriptGUI.src = "https://cdn.jsdelivr.net/gh/dad72/CastorGUI/dist/castorGUI.min.js";
+document.body.appendChild(scriptGUI);
+
+var AMGR = null;
+var scene = null;
+var DRAG = null;
+var camera = null;
+var OBJ = {
+        colors              : {},
+        materials           : {},
+        colors				: {},
+        colorDiffuse		: null,
+        colorSpecular		: null,
+        itemMove            : null,
+        items               : [],
+        actions             : {}
+    }
+
+var createScene = function () {
+    scene = createCerebroScene();
+    // var scene1 = createSecondScene();
+
+    DRAGXY = new BABYLON.PointerDragBehavior({dragPlaneNormal: new BABYLON.Vector3(0, -1, 0)});
+	DRAGXY.updateDragPlane = false;
+	DRAGXY.useObjectOrienationForDragging = false;
+
+    AMGR = new BABYLON.ActionManager(scene);
+
+    _init();
+    _items(scene);
+
+
+    scene.cameraToUseForPointers = camera;
+    // setTimeout(function() {
+    //     engine.stopRenderLoop();
+
+    //     engine.runRenderLoop(function () {
+    //         scene.render();
+    //         // scene1.render();
+    //     });
+    // }, 500);
+
+    return scene;
+};
+
+function _init() {
+
+	OBJ.colorDiffuse						= new BABYLON.Color3(0.1, 0.1, 0.1);
+	OBJ.colorSpecular						= new BABYLON.Color3(0.1, 0.1, 0.1);
+
+	OBJ.colors.red							= new BABYLON.Color3(0.8, 0.2, 0.2);
+	OBJ.colors.green						= new BABYLON.Color3(0.1, 0.6, 0.1);
+	OBJ.colors.blue							= new BABYLON.Color3(0.1, 0.2, 0.8);
+	OBJ.colors.orange						= new BABYLON.Color3(0.8, 0.5, 0.1);
+	OBJ.colors.purple						= new BABYLON.Color3(0.8, 0.2, 0.8);
+
+	OBJ.actions.pickUp						= new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, _pick_up);
+	OBJ.actions.pickDown					= new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, _pick_down);
+
+	for (var i in OBJ.actions)
+		AMGR.registerAction(OBJ.actions[i]);
+}
+
+function _items() {
+    var
+        x =
+        y =
+        z = 0,
+        matBox = new BABYLON.StandardMaterial('matBox', scene)
+        ;
+
+    z = 20;
+
+    matBox.diffuseColor     = OBJ.colorDiffuse;
+    matBox.specularColor    = OBJ.colorSpecular;
+    matBox.emissiveColor    = new BABYLON.Color3(.3, .3, .3);
+    matBox.alpha            = .6;
+
+    var
+        cmd = [
+            "\uf044",
+            "\uf1e3"
+        ]
+        ;
+
+    for (var i = 0; i < 3; i ++) {
+
+        // Main item (BLUE BOX)
+        var m = BABYLON.MeshBuilder.CreatePlane(
+            'ITEM-' + i,
+            {
+                width: 12,
+                height: 5
+            },
+            scene
+        );
+        m.position.x = x;
+        m.position.y = y;
+        m.position.z = z;
+        m.isPickable = true;
+        m.billboardMode	= BABYLON.Mesh.BILLBOARDMODE_ALL;
+
+		// Main item's material (BLUE)
+		var mat             = new BABYLON.StandardMaterial('mat-' + i, scene);
+		mat.diffuseColor    = OBJ.colorDiffuse;
+		mat.specularColor   = OBJ.colorSpecular;
+		mat.emissiveColor   = new BABYLON.Color3().copyFrom(OBJ.colors.blue);
+		m.material		    = mat;
+
+		m.hoverCursor	    = 'pointer';
+		m.actionManager	    = AMGR;
+
+		m.__DTX	= new BABYLON.DynamicTexture('DTX-' + i, {width: 12 * 64, height: 5 * 64}, scene);
+		m.material.emissiveTexture = m.__DTX;
+		m.__DTX.drawText('Object ' + i, null, null, 'bold 96px Arial', 'white', null, true, true);
+
+
+        // Item's control box
+		m.__bottom = BABYLON.MeshBuilder.CreatePlane(m.id + '-CTL', { width: 12, height: 4 }, scene);
+		m.__bottom.parent = m;
+		m.__bottom.position.y = - 4.5;
+		m.__bottom.material = matBox;
+
+        // Controls
+		for (var k in cmd) {
+			var
+				b = BABYLON.MeshBuilder.CreatePlane(m.id + '-CMD-' + k, { size: 4 }, scene)
+				;
+			b.parent = m.__bottom;
+			b.position.x = 4 - k * 4;
+			b.position.z = -.1;
+			b.hoverCursor	= 'pointer';
+			//
+			b.material = new BABYLON.StandardMaterial(m.id + '-MAT-BTN-' + k, scene)
+            b.material.diffuseColor     = OBJ.colorDiffuse;
+            b.material.specularColor    = OBJ.colorSpecular;
+            b.material.emissiveColor    = new BABYLON.Color3(.3, .3, .3);
+            b.material.alpha            = .6;
+
+			//
+			b.material.emissiveTexture			= new BABYLON.DynamicTexture(m.id + '-DTX-' + k + '-dtx', {width: 4 * 64, height: 4 * 64}, scene);
+			b.material.emissiveTexture.drawText(cmd[k], null, null, 'normal 168px FontAwesome', 'white', null, true, true);
+		}
+
+        //
+        OBJ.items.push(m);
+        z += 50;
+    }
+}
+
+function _pick_down(a) {
+    camera.detachControl(canvas, true)
+	if (a.sourceEvent.button == 0) {
+		OBJ.itemMove = a.source;
+		DRAGXY.attach(OBJ.itemMove);
+	}
+}
+
+function _pick_up(a) {
+    camera.attachControl(canvas, true)
+    //debugger
+	if (a.source == OBJ.itemMove) {
+		DRAGXY.detach(OBJ.itemMove);
+        DRAGXY.releaseDrag();
+		OBJ.itemMove = null;
+	}
+}
+
+function createCerebroScene() {
+    scene = new BABYLON.Scene(engine);
+    scene.clearColor = BABYLON.Color3.Black();
+    // var camera = new BABYLON.ArcRotateCamera("Camera", 5.6, 1.4, 80, BABYLON.Vector3.Zero(), scene)
+    camera = new BABYLON.ArcRotateCamera("cam", -Math.PI / 2, Math.PI / 2, 10, BABYLON.Vector3.Zero());
+    var anchor = new BABYLON.TransformNode("");
+
+    camera.wheelDeltaPercentage = 0.1;
+    camera.setTarget(BABYLON.Vector3.Zero());
+    camera.attachControl(canvas, true);
+    camera.viewport = new BABYLON.Viewport(0, 0, 1, 1);
+    var light = new BABYLON.HemisphericLight("hemi", new BABYLON.Vector3(0, 1, 0), scene)
+
+    // Create the 3D UI manager
+    var manager = new BABYLON.GUI.GUI3DManager(scene);
+
+    var showInput = false;
+    var smallerMargin = true;
+    var panelMargin = 0.2;
+    var panelCount = 60;
+    var panel1Location = 100;
+    var panel2Location = 260;
+    var panel3Location = 279.97;
+
+    if (smallerMargin) {
+        panelMargin = 0.06;
+        panelCount = 80;
+        panel2Location = 259.5;
+    }
+
+    var input = "";
+
+    scene.activeCameras.push(camera);
+    scene.cameraToUseForPointers = camera;
+
+    createPanel(manager, anchor, panel1Location, panelCount, "panel1", input, showInput, panelMargin);
+    // createPanel(manager, anchor, panel2Location, panelCount, "panel2", input, showInput, panelMargin);
+    // //todo: fix the third panel so the last 3 columns aren't displayed - ie make each row only 7 wide.
+    // createPanel(manager, anchor, panel3Location, panelCount, "panel3", input, showInput, panelMargin);
+
+    // loadCastorGUI();
+
+    return scene;
+}
+
+function createSecondScene() {
+    var scene = new BABYLON.Scene(engine);
+    var input = new BABYLON.GUI.InputText();
+    // var txt = new GUIText("tmpTxt", {x:0, y:0, z:0}, manager, true);
+    // txt.updateText("this is right here in the middle");
+    // txt.setVisible(true);
+
+    var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+    createKeyboard(advancedTexture, input);
+
+    //from https://www.babylonjs-playground.com/#UJEIL#6
+    // var m1 = makeMesh(-25, 0, BABYLON.Mesh.BILLBOARDMODE_NONE)
+    // var m2 = makeMesh(-15, 0, BABYLON.Mesh.BILLBOARDMODE_X)
+    // var m3 = makeMesh(-5, 0, BABYLON.Mesh.BILLBOARDMODE_Y, scene)
+    // var m4 = makeMesh(5, 0, BABYLON.Mesh.BILLBOARDMODE_Z)
+    var m5 = makeMesh(15, 0, BABYLON.Mesh.BILLBOARDMODE_ALL, scene)
+    // var m6 = makeMesh(25, 0, BABYLON.Mesh.BILLBOARDMODE_NONE)
+
+    return scene;
+}
+
+function loadCastorGUI() {
+    scriptGUI.onload = function()
+    {
+        let guisystem = new GUIManager(canvas);
+
+        console.log(guisystem);
+
+        let optionsGUIText = {
+            x: 100,
+            y: 600,
+            text: "CastorGUI created by Dad72 for BabylonJS",
+            color: "#fff809",
+            position: "absolute",
+            inline: true
+        };
+
+        let createdBy = new GUIText("createdBy", optionsGUIText, guisystem);
+        let myFunction = function() { alert("Yes, this work!"); };
+        let guiTexture = new GUITexture("life", "textures/palm.png", {w:150,h:150,x:10,y:10}, guisystem, myFunction);
+    };
+}
+
+function makeMesh(x, z, mode, scene) {
+    var m = BABYLON.Mesh.CreatePlane('', 5, scene)
+    m.position.copyFromFloats(x, 0, z)
+    m.billboardMode = mode
+    return m
+}
+
+//from the arc button panel example
+function createPanel(manager, anchor, rotation, panelCount, panelName, input, showInput, panelMargin) {
+    var panel = new BABYLON.GUI.SpherePanel();
+    panel.margin = panelMargin;
+
+    manager.addControl(panel);
+    panel.linkToTransformNode(anchor);
+    panel.position.z = 1.5;
+
+    // Adapted from here: https://github.com/BabylonJS/Babylon.js/blob/master/gui/src/3D/controls/spherePanel.ts#L60-L69
+    //https://www.babylonjs-playground.com/#HB4C01#377
+    panel._sphericalMapping = function (source) {
+        let newPos = new BABYLON.Vector3(0, 0, this._radius);
+
+        let xAngle = (source.y / this._radius);
+        let yAngle = (source.x / this._radius);
+
+        BABYLON.Matrix.RotationYawPitchRollToRef(yAngle, xAngle, 0, BABYLON.TmpVectors.Matrix[0]);
+
+        return BABYLON.Vector3.TransformNormal(newPos, BABYLON.TmpVectors.Matrix[0]);
+    };
+
+    // Let's add some buttons!
+    var addButton = function(trueFalse) {
+        var button = new BABYLON.GUI.HolographicButton("orientation");
+        panel.addControl(button);
+
+        button.text = panelName + panel.children.length;
+
+        if (trueFalse) {
+            button.onPointerUpObservable.add(function() {
+                // textblock.text = "Up!";
+                // if (!button.isPointerOver)
+                    // return;
+
+                showInput = !showInput;
+
+                // if (showInput) {
+                //     input.alpha = 1;
+                // } else {
+                //     input.alpha = 0;
+                // }
+            });
+        }
+    }
+
+    panel.blockLayout = true;
+    for (var index = 0; index < panelCount; index++) {
+        if (panelName === "panel3") {
+            addButton(false);
+        } else {
+            if (index == 0) {
+                addButton(true);
+            } else {
+                addButton(false);
+            }
+        }
+    }
+
+    panel.blockLayout = false;
+    panel.node.rotation.y += rotation;
+}
+
+//from the virtual keyboard example
+function createKeyboard(advancedTexture, input) {
+    input.width = 0.2;
+    input.maxWidth = 0.2;
+    input.height = "40px";
+    input.text = "Click here to start typing!";
+    input.color = "white";
+    input.background = "green";
+    advancedTexture.addControl(input);
+    input.alpha = 0;
+
+    var keyboard = BABYLON.GUI.VirtualKeyboard.CreateDefaultLayout();
+    keyboard.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+    advancedTexture.addControl(keyboard);
+
+    keyboard.connect(input);
+}

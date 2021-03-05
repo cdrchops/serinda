@@ -1,0 +1,69 @@
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<!--    <script src="{{ url_for('static', filename='tmp/three.js.download') }}"></script>-->
+    <script src="{{ url_for('static', filename='tmp/leap-0.6.4.js.download') }}"></script>
+    <script src="{{ url_for('static', filename='/tmp/leap-plugins-0.1.11pre.js.download') }}"></script>
+    <script src="{{ url_for('static', filename='/tmp/leap-widgets-0.1.0.js.download') }}"></script>
+    <script src="{{ url_for('static', filename='/tmp/OrbitControls.js.download') }}"></script>
+    <script src="{{ url_for('static', filename='/leap/LeapCameraControls.js') }}"></script>
+    <script src="{{ url_for('static', filename='/leap/LeapObjectControls.js') }}"></script>
+
+    <style>
+        img {
+            /*display: block;*/
+            /*margin-left: auto;*/
+            /*margin-right: auto;*/
+            width: 35%
+        }
+
+        #gamecontainer {
+            width: 800px;
+            height: 600px;
+            border: 1px solid black;
+            position: relative;
+            margin: 0 auto; }
+
+        canvas{ position: absolute; z-index: 11 }
+
+        #gamestartscreen {
+            position: absolute;
+            margin: 0 auto;
+            top: 0;
+            /*left: 300px;*/
+            width: 100%;
+            height: 100%;
+            z-index: -2;}
+
+        body {
+            margin: 0;
+        }
+
+        .leap-boneHand {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 800px;
+            height: 600px;
+        }
+
+        #view-source {
+            position: absolute;
+            top: 0;
+            right: 0;
+            margin: 10px;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+    {% include 'interactiveLeap.html' %}
+    <div class="gamecontainer" style="display:table-row;background-color:transparent;">
+        <canvas class="leap-boneHand"></canvas>
+        <div id="gamestartscreen">
+            <img id="bg" src="{{ url_for('video_feed') }}"/>
+        </div>
+    </div>
+</body>
+</html>
