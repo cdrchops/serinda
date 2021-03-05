@@ -27,4 +27,4 @@ whichEyeDisplay=Both
 nluFactory = rhasspy
 
 # this is to change it so that if I plug in the glasses camera then I want to use that camera
-singleCamera = False
+singleCamera = True
