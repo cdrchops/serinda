@@ -5,8 +5,32 @@ var scene = null;
 var sceneToRender = null;
 var createDefaultEngine = function() { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true,  disableWebGL2Support: false}); };
 
+var AMGR = null;
+var DRAG = null;
+var camera = null;
+var OBJ = {
+        colors              : {},
+        materials           : {},
+        colors				: {},
+        colorDiffuse		: null,
+        colorSpecular		: null,
+        itemMove            : null,
+        items               : [],
+        actions             : {}
+    }
+
 var createScene = function () {
-    var scene = createCerebroScene();
+    scene = createCerebroScene();
+
+    // https://www.babylonjs-playground.com/#ER6T4W#58
+    DRAGXY = new BABYLON.PointerDragBehavior({dragPlaneNormal: new BABYLON.Vector3(0, -1, 0)});
+	DRAGXY.updateDragPlane = false;
+	DRAGXY.useObjectOrienationForDragging = false;
+
+    AMGR = new BABYLON.ActionManager(scene);
+
+    _init();
+    _items(scene);
 
     setTimeout(function() {
         engine.stopRenderLoop();
@@ -19,13 +43,140 @@ var createScene = function () {
     return scene;
 };
 
+function setOCVData(data) {
+    // alert(JSON.stringify(data));
+}
+
+
+function _init() {
+
+	OBJ.colorDiffuse						= new BABYLON.Color3(0.1, 0.1, 0.1);
+	OBJ.colorSpecular						= new BABYLON.Color3(0.1, 0.1, 0.1);
+
+	OBJ.colors.red							= new BABYLON.Color3(0.8, 0.2, 0.2);
+	OBJ.colors.green						= new BABYLON.Color3(0.1, 0.6, 0.1);
+	OBJ.colors.blue							= new BABYLON.Color3(0.1, 0.2, 0.8);
+	OBJ.colors.orange						= new BABYLON.Color3(0.8, 0.5, 0.1);
+	OBJ.colors.purple						= new BABYLON.Color3(0.8, 0.2, 0.8);
+
+	OBJ.actions.pickUp						= new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, _pick_up);
+	OBJ.actions.pickDown					= new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, _pick_down);
+
+	for (var i in OBJ.actions)
+		AMGR.registerAction(OBJ.actions[i]);
+}
+
+function _items() {
+    var
+        x =
+        y =
+        z = 0,
+        matBox = new BABYLON.StandardMaterial('matBox', scene)
+        ;
+
+    z = 20;
+
+    matBox.diffuseColor     = OBJ.colorDiffuse;
+    matBox.specularColor    = OBJ.colorSpecular;
+    matBox.emissiveColor    = new BABYLON.Color3(.3, .3, .3);
+    matBox.alpha            = .6;
+
+    var
+        cmd = [
+            "\uf044",
+            "\uf1e3"
+        ]
+        ;
+
+    for (var i = 0; i < 3; i ++) {
+
+        // Main item (BLUE BOX)
+        var m = BABYLON.MeshBuilder.CreatePlane(
+            'ITEM-' + i,
+            {
+                width: 12,
+                height: 5
+            },
+            scene
+        );
+        m.position.x = x;
+        m.position.y = y;
+        m.position.z = z;
+        m.isPickable = true;
+        m.billboardMode	= BABYLON.Mesh.BILLBOARDMODE_ALL;
+
+		// Main item's material (BLUE)
+		var mat             = new BABYLON.StandardMaterial('mat-' + i, scene);
+		mat.diffuseColor    = OBJ.colorDiffuse;
+		mat.specularColor   = OBJ.colorSpecular;
+		mat.emissiveColor   = new BABYLON.Color3().copyFrom(OBJ.colors.blue);
+		m.material		    = mat;
+
+		m.hoverCursor	    = 'pointer';
+		m.actionManager	    = AMGR;
+
+		m.__DTX	= new BABYLON.DynamicTexture('DTX-' + i, {width: 12 * 64, height: 5 * 64}, scene);
+		m.material.emissiveTexture = m.__DTX;
+		m.__DTX.drawText('Object ' + i, null, null, 'bold 96px Arial', 'white', null, true, true);
+
+
+        // Item's control box
+		m.__bottom = BABYLON.MeshBuilder.CreatePlane(m.id + '-CTL', { width: 12, height: 4 }, scene);
+		m.__bottom.parent = m;
+		m.__bottom.position.y = - 4.5;
+		m.__bottom.material = matBox;
+
+        // Controls
+		for (var k in cmd) {
+			var
+				b = BABYLON.MeshBuilder.CreatePlane(m.id + '-CMD-' + k, { size: 4 }, scene)
+				;
+			b.parent = m.__bottom;
+			b.position.x = 4 - k * 4;
+			b.position.z = -.1;
+			b.hoverCursor	= 'pointer';
+			//
+			b.material = new BABYLON.StandardMaterial(m.id + '-MAT-BTN-' + k, scene)
+            b.material.diffuseColor     = OBJ.colorDiffuse;
+            b.material.specularColor    = OBJ.colorSpecular;
+            b.material.emissiveColor    = new BABYLON.Color3(.3, .3, .3);
+            b.material.alpha            = .6;
+
+			//
+			b.material.emissiveTexture			= new BABYLON.DynamicTexture(m.id + '-DTX-' + k + '-dtx', {width: 4 * 64, height: 4 * 64}, scene);
+			b.material.emissiveTexture.drawText(cmd[k], null, null, 'normal 168px FontAwesome', 'white', null, true, true);
+		}
+
+        //
+        OBJ.items.push(m);
+        z += 50;
+    }
+}
+
+function _pick_down(a) {
+    camera.detachControl(canvas, true)
+	if (a.sourceEvent.button == 0) {
+		OBJ.itemMove = a.source;
+		DRAGXY.attach(OBJ.itemMove);
+	}
+}
+
+function _pick_up(a) {
+    camera.attachControl(canvas, true)
+    //debugger
+	if (a.source == OBJ.itemMove) {
+		DRAGXY.detach(OBJ.itemMove);
+        DRAGXY.releaseDrag();
+		OBJ.itemMove = null;
+	}
+}
+
 function createCerebroScene() {
     var scene = new BABYLON.Scene(engine);
     scene.clearColor = BABYLON.Color3.Black();
     // var camera = new BABYLON.ArcRotateCamera("Camera", 5.6, 1.4, 80, BABYLON.Vector3.Zero(), scene)
-    var camera = new BABYLON.ArcRotateCamera("cam", -Math.PI / 2, Math.PI / 2, 10, BABYLON.Vector3.Zero());
+    camera = new BABYLON.ArcRotateCamera("cam", -Math.PI / 2, Math.PI / 2, 10, BABYLON.Vector3.Zero());
     var anchor = new BABYLON.TransformNode("");
-
 
     camera.wheelDeltaPercentage = 0.1;
     camera.setTarget(BABYLON.Vector3.Zero());

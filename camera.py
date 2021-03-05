@@ -3,13 +3,13 @@ import cv2
 # from imutils.video import VideoStream
 import numpy as np
 
-face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_alt2.xml")
+face_cascade = cv2.CascadeClassifier("./haarcascade_frontalface_alt2.xml")
 ds_factor = 0.6
 
 
 class VideoCamera(object):
     def __init__(self):
-        self.video = cv2.VideoCapture(0)
+        self.video = cv2.VideoCapture(1)
         # self.vs = VideoStream(src=1).start()
 
     def __del__(self):
@@ -26,15 +26,15 @@ class VideoCamera(object):
         # image = self.vs.read()
         # image = imutils.resize(image, width=800)
         # transparent_img = np.zeros((1280, 800, 4), dtype=np.uint8)
-        transparent_img = np.zeros((640, 480, 4), dtype=np.uint8)
-        image = cv2.resize(image, None, fx=ds_factor, fy=ds_factor, interpolation=cv2.INTER_AREA)
+        # transparent_img = np.zeros((640, 480, 4), dtype=np.uint8)
+        # image = cv2.resize(image, None, fx=ds_factor, fy=ds_factor, interpolation=cv2.INTER_AREA)
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         face_rects = face_cascade.detectMultiScale(gray, 1.3, 5)
         # return face_rects
-        for (x, y, w, h) in face_rects:
-            cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            cv2.rectangle(transparent_img, (x, y), (x + w, y + h), (0, 255, 0, 255), 2)
-            break
+        # for (x, y, w, h) in face_rects:
+        #     cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        #     cv2.rectangle(transparent_img, (x, y), (x + w, y + h), (0, 255, 0, 255), 2)
+        #     break
 
         ret, jpeg = cv2.imencode('.png', image)
         return (jpeg.tobytes(), face_rects)

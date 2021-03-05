@@ -4,7 +4,7 @@
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-      <title>OpenCV.js Face Detection (WebAssembly)</title>
+      <title>SERINDA - Intelligent Personal Assistant</title>
       <link rel="stylesheet" href="/static/hungxing/css/style.css">
 
         <!-- Babylon.js -->
@@ -29,7 +29,7 @@
 
         <script src="/static/util.js"></script>
     {#  <script src="/static/gl-matrix.js"></script>#}
-        <script src="/static/webgl-video-cube.js"></script>
+{#        <script src="/static/webgl-video-cube.js"></script>#}
 
        <style>
             html, body {
@@ -88,7 +88,7 @@
           OpenCV.js is loading...
         </div>
 
-        <div class="invisible">
+        <div>class="invisible"
           <input type="checkbox" id="face" name="classifier" value="face" checked>
           <label for="face">face</label>
           <input type="checkbox" id="eye" name="cascade" value="eye">
@@ -101,12 +101,12 @@
                 <div class="invisible">{# style="display: inline-block; text-align: center; display: none;z-index: -1"#}
                     <video id="video" width="640" height="480" class="hidden"></video>
                 </div>
-                <div  id="container">
+                <div id="container">
                     <canvas id="canvasOutput" width="640" height="480"></canvas>
                 </div>
-                <div style="display: inline-block; text-align: center">
-                    <canvas id="webgl-draw" width="640" height="480"></canvas>
-                </div>
+{#                <div style="display: inline-block; text-align: center">#}
+{#                    <canvas id="webgl-draw" width="640" height="480"></canvas>#}
+{#                </div>#}
             </div>
             <canvas id="renderCanvas"></canvas>
         </div>
@@ -118,18 +118,8 @@
         <script src="/static/cerebro.js"></script>
         <script src="/static/createCerebro.js"></script>
 
+{#        <script src="/static/showDevices.js"></script>#}
         <script>
-            //determine the devices on the system
-            {#navigator.mediaDevices.enumerateDevices()#}
-            {#.then(function(devices) {#}
-            {#    devices.forEach(function(device) {#}
-            {#        console.log(device.kind + ": " + device.label + " id = " + device.deviceId);#}
-            {#    });#}
-            {# }) #}
-            {#.catch(function(err) {#}
-            {#    console.log(err.name + ": " + err.message);#}
-            {# }); #}
-
             var featuresReady = checkFeatures(document.getElementById("info"), {webrtc: true, wasm: true});
         </script>
         <script src="/static/hungxing/face-detection/js/index.js"></script>
@@ -145,14 +135,5 @@
         };
         </script>
         <script async src="/static/opencv.js"></script>
-        <script>
-          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-          })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-          ga('create', 'UA-104754587-1', 'auto');
-          ga('send', 'pageview');
-        </script>
     </body>
 </html>

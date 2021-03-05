@@ -7,9 +7,9 @@ canvas {
 .text-center {
   text-align: center;
 }
-div {
-  margin: 10px;
-}
+/*div {*/
+/*  margin: 10px;*/
+/*}*/
 #info {
   font: 16px 'Lucida Grande', sans-serif;
 }
