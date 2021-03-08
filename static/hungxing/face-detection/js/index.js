@@ -76,6 +76,7 @@ function startVideoProcessing() {
         console.warn("Please startup your webcam");
         return;
     }
+
     stopVideoProcessing();
     canvasInput = document.createElement('canvas');
     canvasInput.width = videoWidth;
@@ -120,25 +121,31 @@ function processVideo() {
                 cv.pyrDown(faceMat, faceMat);
             size = faceMat.size();
         }
+
         faceClassifier.detectMultiScale(faceMat, faceVect);
-        for (let i = 0; i < faceVect.size(); i++) {
-            let face = faceVect.get(i);
+        if (faceVect.size() == 0) {
+            removeOCVData("face");
+        } else {
+            for (let i = 0; i < faceVect.size(); i++) {
+                let face = faceVect.get(i);
 
-            setOCVData(face);
+                setOCVData(face, "face");
 
-            /*faces.push(new cv.Rect(face.x, face.y, face.width, face.height));
-            if (detectEye.checked) {
-                let eyeVect = new cv.RectVector();
-                let eyeMat = faceMat.roi(face);
-                eyeClassifier.detectMultiScale(eyeMat, eyeVect);
-                for (let i = 0; i < eyeVect.size(); i++) {
-                    let eye = eyeVect.get(i);
-                    eyes.push(new cv.Rect(face.x + eye.x, face.y + eye.y, eye.width, eye.height));
-                }
-                eyeMat.delete();
-                eyeVect.delete();
-            }*/
+                /*faces.push(new cv.Rect(face.x, face.y, face.width, face.height));
+                if (detectEye.checked) {
+                    let eyeVect = new cv.RectVector();
+                    let eyeMat = faceMat.roi(face);
+                    eyeClassifier.detectMultiScale(eyeMat, eyeVect);
+                    for (let i = 0; i < eyeVect.size(); i++) {
+                        let eye = eyeVect.get(i);
+                        eyes.push(new cv.Rect(face.x + eye.x, face.y + eye.y, eye.width, eye.height));
+                    }
+                    eyeMat.delete();
+                    eyeVect.delete();
+                }*/
+            }
         }
+
         faceMat.delete();
         faceVect.delete();
     } else {
@@ -156,6 +163,7 @@ function processVideo() {
             eyeVect.delete();
         }
     }
+
     canvasOutputCtx.drawImage(canvasInput, 0, 0, videoWidth, videoHeight);
     drawResults(canvasOutputCtx, faces, 'red', size);
     drawResults(canvasOutputCtx, eyes, 'yellow', size);

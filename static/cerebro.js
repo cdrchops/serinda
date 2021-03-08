@@ -5,6 +5,8 @@ var scene = null;
 var sceneToRender = null;
 var createDefaultEngine = function() { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true,  disableWebGL2Support: false}); };
 
+let hudElements = new Map()
+
 var AMGR = null;
 var DRAG = null;
 var camera = null;
@@ -19,6 +21,11 @@ var OBJ = {
         actions             : {}
     }
 
+var
+    x =
+    y =
+    z = 0, matBox, cmd;
+
 var createScene = function () {
     scene = createCerebroScene();
 
@@ -30,7 +37,7 @@ var createScene = function () {
     AMGR = new BABYLON.ActionManager(scene);
 
     _init();
-    _items(scene);
+    // _items(scene);
 
     setTimeout(function() {
         engine.stopRenderLoop();
@@ -42,11 +49,98 @@ var createScene = function () {
 
     return scene;
 };
+var once = true;
 
-function setOCVData(data) {
-    // alert(JSON.stringify(data));
+function removeOCVData(label) {
+    if (hudElements.has(label)) {
+        var tmpItem = hudElements.get(label);
+        scene.removeMesh(hudElements.get(label));
+        scene.removeMesh('mat-' + label);
+        // scene.removeMesh('DTX-' + label);
+        scene.removeMesh(tmpItem.id + '-CTL-' + label);
+        hudElements.delete(label);
+    }
 }
 
+function setOCVData(data, label) {
+    //TODO: this is the part to work on
+    // - determine what is detected and then adding the item to a map
+    // - if the item is not detected then the panel is removed
+    // - if multiple items are detected then they'll all be added to the map
+
+    // makeItem(5);
+    if (hudElements.has(label)) {
+        var element = hudElements.get(label);
+        element.position.x = data.x - data.x;
+        element.position.y = data.y - data.y;
+        element.position.z = data.width;
+    } else {
+        var tmpElement = createFaceHUD(data, label);
+        hudElements.set(label, tmpElement);
+    }
+}
+
+function createFaceHUD(data, label) {
+    // Main item (BLUE BOX)
+    var m = BABYLON.MeshBuilder.CreatePlane(
+        label,
+        {
+            width: 12,
+            height: 5
+        },
+        scene
+    );
+
+    m.position.x = data.x - data.x;
+    m.position.y = data.y - data.y;
+    m.position.z = data.width;
+    m.isPickable = true;
+    m.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+
+    // Main item's material (BLUE)
+    var mat = new BABYLON.StandardMaterial('mat-' + label, scene);
+    mat.diffuseColor = OBJ.colorDiffuse;
+    mat.specularColor = OBJ.colorSpecular;
+    mat.emissiveColor = new BABYLON.Color3().copyFrom(OBJ.colors.blue);
+    m.material = mat;
+
+    m.hoverCursor = 'pointer';
+    m.actionManager = AMGR;
+
+    m.__DTX = new BABYLON.DynamicTexture('DTX-' + label, {width: 12 * 64, height: 5 * 64}, scene);
+    m.material.emissiveTexture = m.__DTX;
+    m.__DTX.drawText(label, null, null, 'bold 96px Arial', 'white', null, true, true);
+
+    // Item's control box
+    /*m.__bottom = BABYLON.MeshBuilder.CreatePlane(m.id + '-CTL-' + label, {width: 12, height: 4}, scene);
+    m.__bottom.parent = m;
+    m.__bottom.position.y = -4.5;
+    m.__bottom.material = matBox;
+
+    // Controls
+    for (var k in cmd) {
+        var b = BABYLON.MeshBuilder.CreatePlane(m.id + '-CMD-' + k, {size: 4}, scene);
+        b.parent = m.__bottom;
+        b.position.x = 4 - k * 4;
+        b.position.z = -.1;
+        b.hoverCursor = 'pointer';
+
+        b.material = new BABYLON.StandardMaterial(m.id + '-MAT-BTN-' + k, scene)
+        b.material.diffuseColor = OBJ.colorDiffuse;
+        b.material.specularColor = OBJ.colorSpecular;
+        b.material.emissiveColor = new BABYLON.Color3(.3, .3, .3);
+        b.material.alpha = .6;
+
+        b.material.emissiveTexture = new BABYLON.DynamicTexture(m.id + '-DTX-' + k + '-dtx', {
+            width: 4 * 64,
+            height: 4 * 64
+        }, scene);
+
+        b.material.emissiveTexture.drawText(cmd[k], null, null, 'normal 168px FontAwesome', 'white', null, true, true);
+    }*/
+
+    return m;
+}
 
 function _init() {
 
@@ -62,17 +156,15 @@ function _init() {
 	OBJ.actions.pickUp						= new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, _pick_up);
 	OBJ.actions.pickDown					= new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, _pick_down);
 
+	for (var i in hudElements.size) {
+	    AMGR.registerAction(hudElements.get(i));
+    }
 	for (var i in OBJ.actions)
 		AMGR.registerAction(OBJ.actions[i]);
 }
 
 function _items() {
-    var
-        x =
-        y =
-        z = 0,
-        matBox = new BABYLON.StandardMaterial('matBox', scene)
-        ;
+    matBox = new BABYLON.StandardMaterial('matBox', scene);
 
     z = 20;
 
@@ -81,76 +173,75 @@ function _items() {
     matBox.emissiveColor    = new BABYLON.Color3(.3, .3, .3);
     matBox.alpha            = .6;
 
-    var
-        cmd = [
+    cmd = [
             "\uf044",
             "\uf1e3"
         ]
         ;
 
-    for (var i = 0; i < 3; i ++) {
+    // for (var i = 0; i < 3; i ++) {
+    //     makeItem(i);
+    // }
+}
 
-        // Main item (BLUE BOX)
-        var m = BABYLON.MeshBuilder.CreatePlane(
-            'ITEM-' + i,
-            {
-                width: 12,
-                height: 5
-            },
-            scene
-        );
-        m.position.x = x;
-        m.position.y = y;
-        m.position.z = z;
-        m.isPickable = true;
-        m.billboardMode	= BABYLON.Mesh.BILLBOARDMODE_ALL;
+function makeItem(i) {
+    // Main item (BLUE BOX)
+    var m = BABYLON.MeshBuilder.CreatePlane(
+        'ITEM-' + i,
+        {
+            width: 12,
+            height: 5
+        },
+        scene
+    );
+    m.position.x = x;
+    m.position.y = y;
+    m.position.z = z;
+    m.isPickable = true;
+    m.billboardMode	= BABYLON.Mesh.BILLBOARDMODE_ALL;
 
-		// Main item's material (BLUE)
-		var mat             = new BABYLON.StandardMaterial('mat-' + i, scene);
-		mat.diffuseColor    = OBJ.colorDiffuse;
-		mat.specularColor   = OBJ.colorSpecular;
-		mat.emissiveColor   = new BABYLON.Color3().copyFrom(OBJ.colors.blue);
-		m.material		    = mat;
+    // Main item's material (BLUE)
+    var mat             = new BABYLON.StandardMaterial('mat-' + i, scene);
+    mat.diffuseColor    = OBJ.colorDiffuse;
+    mat.specularColor   = OBJ.colorSpecular;
+    mat.emissiveColor   = new BABYLON.Color3().copyFrom(OBJ.colors.blue);
+    m.material		    = mat;
 
-		m.hoverCursor	    = 'pointer';
-		m.actionManager	    = AMGR;
+    m.hoverCursor	    = 'pointer';
+    m.actionManager	    = AMGR;
 
-		m.__DTX	= new BABYLON.DynamicTexture('DTX-' + i, {width: 12 * 64, height: 5 * 64}, scene);
-		m.material.emissiveTexture = m.__DTX;
-		m.__DTX.drawText('Object ' + i, null, null, 'bold 96px Arial', 'white', null, true, true);
+    m.__DTX	= new BABYLON.DynamicTexture('DTX-' + i, {width: 12 * 64, height: 5 * 64}, scene);
+    m.material.emissiveTexture = m.__DTX;
+    m.__DTX.drawText('Object ' + i, null, null, 'bold 96px Arial', 'white', null, true, true);
 
+    // Item's control box
+    m.__bottom = BABYLON.MeshBuilder.CreatePlane(m.id + '-CTL', { width: 12, height: 4 }, scene);
+    m.__bottom.parent = m;
+    m.__bottom.position.y = - 4.5;
+    m.__bottom.material = matBox;
 
-        // Item's control box
-		m.__bottom = BABYLON.MeshBuilder.CreatePlane(m.id + '-CTL', { width: 12, height: 4 }, scene);
-		m.__bottom.parent = m;
-		m.__bottom.position.y = - 4.5;
-		m.__bottom.material = matBox;
-
-        // Controls
-		for (var k in cmd) {
-			var
-				b = BABYLON.MeshBuilder.CreatePlane(m.id + '-CMD-' + k, { size: 4 }, scene)
-				;
-			b.parent = m.__bottom;
-			b.position.x = 4 - k * 4;
-			b.position.z = -.1;
-			b.hoverCursor	= 'pointer';
-			//
-			b.material = new BABYLON.StandardMaterial(m.id + '-MAT-BTN-' + k, scene)
-            b.material.diffuseColor     = OBJ.colorDiffuse;
-            b.material.specularColor    = OBJ.colorSpecular;
-            b.material.emissiveColor    = new BABYLON.Color3(.3, .3, .3);
-            b.material.alpha            = .6;
-
-			//
-			b.material.emissiveTexture			= new BABYLON.DynamicTexture(m.id + '-DTX-' + k + '-dtx', {width: 4 * 64, height: 4 * 64}, scene);
-			b.material.emissiveTexture.drawText(cmd[k], null, null, 'normal 168px FontAwesome', 'white', null, true, true);
-		}
+    // Controls
+    for (var k in cmd) {
+        var b = BABYLON.MeshBuilder.CreatePlane(m.id + '-CMD-' + k, { size: 4 }, scene);
+        b.parent = m.__bottom;
+        b.position.x = 4 - k * 4;
+        b.position.z = -.1;
+        b.hoverCursor	= 'pointer';
+        //
+        b.material = new BABYLON.StandardMaterial(m.id + '-MAT-BTN-' + k, scene)
+        b.material.diffuseColor     = OBJ.colorDiffuse;
+        b.material.specularColor    = OBJ.colorSpecular;
+        b.material.emissiveColor    = new BABYLON.Color3(.3, .3, .3);
+        b.material.alpha            = .6;
 
         //
-        OBJ.items.push(m);
-        z += 50;
+        b.material.emissiveTexture			= new BABYLON.DynamicTexture(m.id + '-DTX-' + k + '-dtx', {width: 4 * 64, height: 4 * 64}, scene);
+        b.material.emissiveTexture.drawText(cmd[k], null, null, 'normal 168px FontAwesome', 'white', null, true, true);
     }
+
+    //
+    OBJ.items.push(m);
+    z += 50;
 }
 
 function _pick_down(a) {
@@ -202,10 +293,10 @@ function createCerebroScene() {
 
     var input = "";
 
-    createPanel(manager, anchor, panel1Location, panelCount, "panel1", input, showInput, panelMargin);
-    createPanel(manager, anchor, panel2Location, panelCount, "panel2", input, showInput, panelMargin);
+    // createPanel(manager, anchor, panel1Location, panelCount, "panel1", input, showInput, panelMargin);
+    // createPanel(manager, anchor, panel2Location, panelCount, "panel2", input, showInput, panelMargin);
     //todo: fix the third panel so the last 3 columns aren't displayed - ie make each row only 7 wide.
-    createPanel(manager, anchor, panel3Location, panelCount, "panel3", input, showInput, panelMargin);
+    // createPanel(manager, anchor, panel3Location, panelCount, "panel3", input, showInput, panelMargin);
 
     var button = document.createElement("button");
     button.style.top = "100px";
