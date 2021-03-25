@@ -22,7 +22,6 @@ https://kalwalt.github.io/jsartoolkit5/
     // or facingMode: 'user'
     navigator.mediaDevices.getUserMedia({video: {deviceId: deviceId}, audio: false})
         .then(function (stream) {
-
             v.srcObject = stream;
             v.play();
         })
