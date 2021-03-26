@@ -211,6 +211,7 @@ function opencvIsReady() {
         console.log('Requred features are not ready.');
         return;
     }
+
     info.innerHTML = '';
     initUI();
     startCamera();

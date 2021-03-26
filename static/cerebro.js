@@ -26,25 +26,29 @@ var
     y =
     z = 0, matBox, cmd;
 
-var createScene = function () {
-    scene = createCerebroScene();
+var createScene = function() {
+    // scene = createCerebroScene();
+    scene = createTemplateTracker();
 
     // https://www.babylonjs-playground.com/#ER6T4W#58
-    DRAGXY = new BABYLON.PointerDragBehavior({dragPlaneNormal: new BABYLON.Vector3(0, -1, 0)});
-	DRAGXY.updateDragPlane = false;
-	DRAGXY.useObjectOrienationForDragging = false;
+    // DRAGXY = new BABYLON.PointerDragBehavior({dragPlaneNormal: new BABYLON.Vector3(0, -1, 0)});
+	// DRAGXY.updateDragPlane = false;
+	// DRAGXY.useObjectOrienationForDragging = false;
+    //
+    // AMGR = new BABYLON.ActionManager(scene);
+    // //
+    // _init();
 
-    AMGR = new BABYLON.ActionManager(scene);
+    var vid = document.getElementById("video");
+    console.log("vid " + JSON.stringify(vid.attributes));
 
-    _init();
-
-    setTimeout(function() {
+/*    setTimeout(function() {
         engine.stopRenderLoop();
 
         engine.runRenderLoop(function () {
             scene.render();
         });
-    }, 500);
+    }, 500);*/
 
     return scene;
 };
@@ -298,5 +302,57 @@ function createFaceHUD(data, label) {
     }*/
 
     return m;
+}
+
+async function createTemplateTracker() {
+    var scene = new BABYLON.Scene(engine);
+    scene.clearColor = BABYLON.Color3.Black();
+
+    var camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 0, -1), scene);
+    camera.mode = BABYLON.Camera.ORTHOGRAPHIC_CAMERA;
+    camera.minZ = 0.1;
+
+    var interactionDisabled = true;
+    var setInteractionDisabled = (disabled) => {};
+
+    // Set up plane.
+    var plane = BABYLON.MeshBuilder.CreatePlane("plane", {}, scene);
+    plane.scaling.y = -1;
+    var planeMaterial = new BABYLON.PBRMaterial("planeMaterial", scene);
+    planeMaterial.unlit = true;
+    plane.material = planeMaterial;
+
+    // Add video texture.
+    const constraints = {
+        maxWidth: 640, // Magic number
+        maxHeight: 480, // Magic number
+        minWidth: 640, // Magic number
+        minHeight: 480, // Magic number
+        deviceId: 'f987dd7c8a8ddb5003176852f8bcb5254f9eac9b0c9e73b67a76373197b54f6d'
+    };
+
+    var texture = await BABYLON.VideoTexture.CreateFromWebCamAsyncWithId(scene, constraints, false, "video");
+
+    plane.material.albedoTexture = texture;
+    plane.scaling.x = texture.getSize().width / texture.getSize().height;
+
+    // Resize logic.
+    var ratio = 1;
+    var scale = 1;
+    scene.onBeforeRenderObservable.add(() => {
+        ratio = canvas.width / canvas.height;
+        camera.orthoBottom = -scale / 2;
+        camera.orthoTop = scale / 2;
+        camera.orthoLeft = -scale * ratio / 2;
+        camera.orthoRight = scale * ratio / 2;
+    });
+
+    // Create the template tracker
+    var tracker = await BabylonAR.ImageTemplateTracker.CreateAsync(texture);
+    tracker = createTrackingIndicator(scene, tracker, plane);
+
+    drawTracker(scene, canvas, camera, scale, plane, tracker);
+
+    return scene;
 }
 
