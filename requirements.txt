@@ -1,7 +1,6 @@
 flask~=1.1.2
 nlu~=1.0.5
 numpy~=1.19.4
-pywinauto~=0.6.8
 matplotlib~=3.3.3
 pyttsx3~=2.90
 autoscraper~=1.1.10
