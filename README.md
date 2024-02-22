@@ -1,3 +1,10 @@
+<h1>Gearing up for the next version of SERINDA</h1>
+
+This next version of SERINDA will be called V3 or Graceland.  
+
+See [this](https://winkdoubleguns.com/2024/02/22/serinda-v3-graceland/) this blog post to find out what's coming up.
+
+
 <h2>What is SERINDA?</h2>
 Sophisticated Engaging Rider Interface Near-eye Digital Assistant or SERINDA.<br/><br/>
 It's a Mixed Reality Intelligent Personal Assistant using Python3, Flask, HTML/CSS/JS, and OpenCV.  It was originally supposed to be for HMD on a motorcycle.  It is now, more of an HMD for daily life.
