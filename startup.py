@@ -2,9 +2,11 @@ import os
 import webbrowser
 from sys import platform
 
-os.system("sh ./compileRust.sh")
+# os.system("sh ./compileRust.sh")
+# os.system("compileRust.bat")
 
-os.system("sh ./test.sh")
+# os.system("sh ./test.sh")
+# os.system("test.bat")
 
 from serinda.constants.ApplicationConstants import ApplicationConstants
 
