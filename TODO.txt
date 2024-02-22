@@ -1,0 +1,27 @@
+21Feb24
+    Fix Snips NLU setup
+    Once running simplify what I want it to do
+        like what is the thing I want out of this?
+        list tasks for it
+        set up the display for the individual display elements
+            like how am I going to display PDFs in an AR/MR viewer?
+    Find my projector module and how I'm going to send the display to my eye
+
+5Mar21
+    Get OpenCV coordinates and send to BabylonJS
+    Using OpenCV coordinates display a BabylonJS item in that location on screen
+    Refine LeapMotion hand points for both hands
+    Use hand and finger points to "click" on items in the HUD
+    Use hand and finger points to move items in the HUD
+    Make camera transparent for testing all of the above
+
+    Rearchitect site so that it can be entirely front-end for prototyping
+        or a mix of the two (sending an image and data from opencv to the front end)
+        https://blog.miguelgrinberg.com/post/using-celery-with-flask/page/7
+        https://flask-socketio.readthedocs.io/en/latest/
+        https://flask.palletsprojects.com/en/1.1.x/patterns/streaming/
+    Rearchitect plugins so they can be front-end or backend
+        Maybe add a property to not run a plugin - like front-end or backend always run, but can not run one specifically
+    Figure out how to add Rust extensions to the code programatically like the plugins do
+
+    https://github.com/XingMeansOK/slamjs_samples

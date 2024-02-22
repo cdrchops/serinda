@@ -2,11 +2,14 @@ from snips_nlu import SnipsNLUEngine
 import io
 import json
 
+from serinda.constants.ApplicationConstants import ApplicationConstants
+
+
 class SnipsIntent:
     # specifically the fileOpen parameter is so that testing can adjust the path where this would normally
     # be the expected path - testing hardcoded paths requires them to go up a directory since the
     # TESTS directory is one down from the root directory
-    def __init__(self, fileOpen = "./intents/serindaCommands.json"):
+    def __init__(self, fileOpen = ApplicationConstants.serindaCommandsJsonFile):
         with io.open(fileOpen) as f:
             sample_dataset = json.load(f)
 

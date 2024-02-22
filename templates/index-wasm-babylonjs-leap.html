@@ -1,0 +1,139 @@
+<!-- modified from https://huningxin.github.io/opencv.js/samples/index.html -->
+<!-- https://github.com/XingMeansOK/slamjs_samples -->
+{#https://www.babylonjs-playground.com/index.html#2CTIGK#4#}
+<!DOCTYPE html>
+<html >
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+      <title>SERINDA - Intelligent Personal Assistant</title>
+      <link rel="stylesheet" href="/static/hungxing/css/style.css">
+
+        <!-- Babylon.js -->
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+        <script src="https://code.jquery.com/pep/0.4.2/pep.min.js"></script>
+        <script src="https://mottie.github.io/Keyboard/docs/js/jquery-ui-custom.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/virtual-keyboard/1.30.2/js/jquery.keyboard.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/virtual-keyboard/1.30.2/js/jquery.keyboard.extension-all.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js"></script>
+        <script src="https://preview.babylonjs.com/ammo.js"></script>
+        <script src="https://preview.babylonjs.com/cannon.js"></script>
+        <script src="https://preview.babylonjs.com/Oimo.js"></script>
+        <script src="https://preview.babylonjs.com/earcut.min.js"></script>
+        <script src="https://preview.babylonjs.com/babylon.js"></script>
+        <script src="https://preview.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+        <script src="https://preview.babylonjs.com/proceduralTexturesLibrary/babylonjs.proceduralTextures.min.js"></script>
+        <script src="https://preview.babylonjs.com/postProcessesLibrary/babylonjs.postProcess.min.js"></script>
+        <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.js"></script>
+        <script src="https://preview.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
+        <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
+        <script src="https://preview.babylonjs.com/inspector/babylon.inspector.bundle.js"></script>
+
+        <script src="/static/util.js"></script>
+    {#  <script src="/static/gl-matrix.js"></script>#}
+{#        <script src="/static/webgl-video-cube.js"></script>#}
+
+       <style>
+            html, body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            #keyboard {
+                width:100px;
+                height:20px;
+                position:absolute;
+                color:black;
+            }
+
+            #icon {
+                position:absolute;
+                left: 110px
+            }
+
+            #renderCanvas {
+                width: 640px;
+                height: 480px;
+                touch-action: none;
+                opacity: 50%;
+            }
+
+            /* This is where the height and width of the image returning from the camera is set*/
+            img {
+                width: 640px;
+                height: 480px;
+            }
+
+            #gamecontainer {
+                border: 1px solid black;
+                position: absolute;
+                margin: 0 auto;
+            }
+
+            #gamestartscreen {
+                position: absolute;
+            }
+
+            body {
+                margin: 0;
+            }
+        </style>
+
+        <script src="/static/LeapMotionData.js"></script>
+    </head>
+
+    <body style="background-color:black" onload="init();">
+        <div id="info" class="text-center">
+          OpenCV.js is loading...
+        </div>
+        <div class="gamecontainer" style="display:table-row;background-color:transparent;">
+            <div id="gamestartscreen">
+    {#    <!--        <img id="bg" src="{{ url_for('video_feed') }}"/>-->#}
+                <div class="invisible">{# style="display: inline-block; text-align: center; display: none;z-index: -1"#}
+                    <video id="video" width="640" height="480" class="hidden"></video>
+                </div>
+                <div id="container">
+                    <canvas id="canvasOutput" width="640" height="480"></canvas>
+                </div>
+{#                <div style="display: inline-block; text-align: center">#}
+{#                    <canvas id="webgl-draw" width="640" height="480"></canvas>#}
+{#                </div>#}
+                <div style="color:white">{#class="invisible"#}
+                    <input type="checkbox" id="face" name="classifier" value="face" checked>
+                    <label for="face">face</label>
+                    <input type="checkbox" id="eye" name="cascade" value="eye">
+                    <label for="eye">eye</label>
+                </div>
+            </div>
+            <canvas id="renderCanvas"></canvas>
+        </div>
+
+        <script src="/static/hungxing/libs/adapter-latest.js"></script>
+        <script src="/static/hungxing/libs/stats.min.js"></script>
+        <script src="/static/hungxing/libs/dat.gui.min.js"></script>
+        <script src="/static/hungxing/libs/utils.js"></script>
+        <script src="/static/cerebro.js"></script>
+        <script src="/static/createCerebro.js"></script>
+
+{#        <script src="/static/showDevices.js"></script>#}
+        <script>
+            var featuresReady = checkFeatures(document.getElementById("info"), {webrtc: true, wasm: true});
+        </script>
+        <script src="/static/hungxing/face-detection/js/index.js"></script>
+        <script>
+            var Module = {
+                wasmBinaryFile: '/static/opencv_js.wasm',
+                preRun: [function() {
+                    Module.FS_createPreloadedFile('/', 'haarcascade_eye.xml', '/static/hungxing/data/haarcascade_eye.xml', true, false);
+                    Module.FS_createPreloadedFile('/', 'haarcascade_frontalface_default.xml', '/static/hungxing/data/haarcascade_frontalface_default.xml', true, false);
+                    Module.FS_createPreloadedFile('/', 'haarcascade_profileface.xml', '/static/hungxing/data/haarcascade_profileface.xml', true, false);
+                }],
+                _main: function() {opencvIsReady();}
+            };
+        </script>
+        <script async src="/static/opencv.js"></script>
+    </body>
+</html>

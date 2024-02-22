@@ -1,11 +1,12 @@
+# sudo apt-get install python3-venv
+# python3 -m pip install --user virtualenv
+
+# python3 -m venv serinda
+
+# source ./serinda/bin/activate
+
 pip3 install flask
 pip3 install flask_cors
-
-# rust install for use with snips
-# windows may require a different installer
-# https://www.rust-lang.org/tools/install
-# add %USERPROFILE%\.cargo\bin to windows environment variables
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 pip3 install setuptools_rust
 
@@ -108,3 +109,36 @@ pip3 install adafruit-circuitpython-fxas21002c
 # so we can use python and directly connect to the 9DOF sensor via windows 10
 # https://github.com/tino/pyFirmata
 pip3 install pyfirmata
+
+pip3 install setuptools-rust
+pip3 install scikit-learn
+pip3 install cython
+
+#install en language pack
+pip3 install textblob
+pip3 install snips_nlu
+python3 -m snips_nlu download en
+python3 -m textblob.download_corpora
+
+pip3 install flask
+pip3 install nlu
+pip3 install numpy~=1.19.4
+#pywinauto~=0.6.8
+pip3 install matplotlib~=3.3.3
+pip3 install pyttsx3~=2.90
+pip3 install autoscraper~=1.1.10
+pip3 install Jinja2~=2.11.2
+pip3 install jprops~=2.0.2
+pip3 install imutils~=0.5.3
+pip3 install dlib~=19.21.1
+pip3 install pyzbar~=0.1.8
+pip3 install textblob~=0.15.3
+pip3 install googletrans~=3.0.0
+pip3 install wheel
+pip3 install twine
+pip3 install setuptools
+pip3 install zbar-py
+pip3 install markupsafe==2.0.1
+pip3 install PyAutoGUI~=0.9.50
+pip3 install websockets
+pip3 install rhasspy-nlu

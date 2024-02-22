@@ -2,9 +2,9 @@ import os
 import webbrowser
 from sys import platform
 
-os.system("sh ./compileRust.sh")
+# os.system("sh ./compileRust.sh")
 
-os.system("sh ./test.sh")
+# os.system("sh ./test.sh")
 
 from serinda.constants.ApplicationConstants import ApplicationConstants
 
@@ -35,8 +35,9 @@ elif platform == "darwin":
     webbrowser.get("open -a" + browser + " %s").open(url)
 elif platform == "win32":
     # browser = 'C:/"Program Files (x86)"/Google/Chrome/Application/chrome.exe'
-    os.system("start chrome " + url)
+    # os.system("start chrome " + url)
+    print("nothing here yet")
 
 # this starts up the app and you get console logging just the same
-os.system("python3 main.py --ip 0.0.0.0 --port 8000")
+os.system("python main.py --ip 0.0.0.0 --port 8000")
 

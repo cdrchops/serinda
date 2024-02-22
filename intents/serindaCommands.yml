@@ -1,0 +1,27 @@
+# SERINDA Commands Intent
+
+# City Entity
+---
+type: entity # allows to differentiate between entities and intents files
+name: commandEntity # name of the entity
+values:
+  - show
+  - hide
+  - display
+
+type: intent
+name: showCommands
+slots:
+  - name: commandName
+    entity: commandEntity
+utterances:
+  - [commandName](show) find me a flight from [origin](Paris) to [destination](New York)
+  - [commandEntity]
+  - I need a flight leaving [date](this weekend) to [destination](Berlin)
+  - show me flights to go to [destination](new york) leaving [date](this evening)
+
+
+
+
+[showCommands]
+(show | display | hide) commands

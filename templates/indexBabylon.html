@@ -1,0 +1,37 @@
+{#--{% include 'indexWithThreeJs.html' %}--#}
+{#-- {% include 'bjsocvleapmotion.html' %} --#}
+
+{#--
+{#{% include 'cerebro.html' %}#}
+{#{% include 'index-wasm-babylonjs-leap.html' %}#}
+{#{% include 'bjsocvleapmotion.html' %}#}
+{#{% include 'image-template-tracker.html' %}#}
+
+{#<img id="bg" src="{{ url_for('video_feed') }}"/>#}
+--#}
+<script>
+// Set up audio context and microphone input
+const audioContext = new AudioContext();
+const microphone = audioContext.createMediaStreamSource(stream);
+
+// Set up WebSocket connection to server
+const socket = new WebSocket('ws://localhost:5000/ws');
+
+// Set up WebSocket message event handler
+socket.onmessage = (event) => {
+  console.log(event.data);
+};
+
+// Set up audio processor node to send audio to server
+const processor = audioContext.createScriptProcessor(4096, 1, 1);
+processor.onaudioprocess = (event) => {
+  const audioData = event.inputBuffer.getChannelData(0);
+  socket.send(audioData);
+};
+
+// Connect audio input to processor node
+microphone.connect(processor);
+
+// Connect processor node to audio context output
+processor.connect(audioContext.destination);
+</script>

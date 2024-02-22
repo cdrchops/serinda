@@ -1,0 +1,46 @@
+{
+  "intents": [
+    {
+      "intent": "showCommands",
+      "utterances": [
+        "(show | display | hide) commands"
+      ]
+    },
+    {
+      "intent": "showGrid",
+      "utterances": [
+        "(show | display | draw | hide) grid [(on | for)] camera {cameras:value!int}"
+      ]
+    },
+    {
+      "intent": "detectFaces",
+      "utterances": [
+        "detect (face | faces) (on | for) camera {showGrid.cameras}"
+      ]
+    },
+    {
+      "intent": "showTimestamp",
+      "utterances": [
+        "(show | hide | display) (time | timestamp) (on | for) camera {showGrid.cameras}"
+      ]
+    },
+    {
+      "intent": "trackObjectByGrid",
+      "utterances": [
+        "track object at {xRange:0..150} and {yRange:0..150} by {sizeOfArea:1..50}"
+      ]
+    },
+    {
+      "intent": "detectBarcode",
+      "utterances": [
+        "detect barcode (on | for) camera {showGrid.cameras}"
+      ]
+    },
+    {
+      "intent": "detectMotion",
+      "utterances": [
+        "detect motion (on | for) camera {showGrid.cameras}"
+      ]
+    }
+  ]
+}

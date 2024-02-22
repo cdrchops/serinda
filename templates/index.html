@@ -10,7 +10,8 @@
 {#    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>#}
 
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
-    <link rel="stylesheet" href="/static/hamburger2.css">
+    {#{{ url_for('static', filename='hamburger2.css') }}#}
+   <link rel="stylesheet" href="/static/hamburger2.css">
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -80,6 +81,23 @@
             {%  include 'displaySection.html' %}
         </div>
     </div>
+    {#
+        work on this section so eyes are split for the HMD
+        add properties file and/or a way to change in the menu
+    #}
+    {#<div id="overlay" style="background-color:transparent;margin-left:0">
+        <header style="background-color:transparent; margin-left:0">
+            <details open style="background-color:transparent; margin-left:0">
+                <div style="display:table-row;background-color:transparent;margin-left:0">
+                     <div id="frame1"
+                         style="margin:0;width:49%;display:table-cell;background-color:transparent;padding-right:20px;transform: rotateY(180deg);"><img src="{{ url_for('video_feed') }}?id=0"></div>
+                    <div id="frame2"
+                         style="margin:0;width:49%;display:table-cell;background-color:transparent;transform: rotateY(180deg);"><img src="{{ url_for('video_feed') }}?id=0"></div>
+                    </br>
+                </div>
+            </details>
+        </header>
+    </div>#}
 </main>
 
 {% include 'javascript.html' %}
