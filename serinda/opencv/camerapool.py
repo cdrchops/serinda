@@ -5,6 +5,8 @@ from serinda.plugin.OpenCVPlugin.filters.TimestampDisplayFilter import Timestamp
 from serinda.plugin.OpenCVPlugin.filters.barcodedetect import BarcodeDetect
 from serinda.plugin.OpenCVPlugin.filters.facedetection import FaceDetection
 
+# import inspect module
+import inspect
 
 class CameraPool:
     cameras = []
@@ -40,9 +42,12 @@ class CameraPool:
     # to give all cameras the same command
     def setCommand(self, command, nluIntentProcessor):
         intent = command
+        tmpCamNumber = intent['slots'][0]['rawValue']
+
+        print("intent camera number ", tmpCamNumber)
 
         intentName = nluIntentProcessor.getIntentNameByRecognition(intent)
-        cameraNumber = intent[0].entities[0].value - 1
+        cameraNumber = int(tmpCamNumber) - 1 #intent[0].entities[0].value - 1
         cam = self.cameras[cameraNumber]
 
         if intentName == 'showGrid':

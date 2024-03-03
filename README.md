@@ -90,7 +90,10 @@ A Mixed Reality (MR) platform that could potentially be downgraded to Augmented 
 		- either digital or print books  
 		- tracks the "director box" hand gestures  ![[box-shape-made-out-of-hands-CXNDM7.jpg|100]]
   
-### TODO  List
+### TODO List
+- update installs so that numpy doesn't break
+- set a setting so that you can say whether or not you have a raspberry pi - that way Rasspy can or can't be used
+- 
   
 ### Research Items  
 - https://voice2json.org/sentences.html    
