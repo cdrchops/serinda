@@ -19,18 +19,19 @@ class CameraPool:
     params = {}
 
     def __init__(self, propertiesFile):
-        self.runCameras = propertiesFile.get("run.cameras")
-        self.runCameras = self.runCameras == "True"
+        # self.runCameras = propertiesFile.get("run.cameras")
+        # self.runCameras = self.runCameras == "True"
 
-        self.numberOfCameras = int(propertiesFile.get("number.of.cameras"))
+        self.numberOfCameras = 1#int(propertiesFile.get("number.of.cameras"))
         # print(str(self.numberOfCameras))
-        singleCamera = propertiesFile.get("useSingleCamera")
+        # singleCamera = propertiesFile.get("useSingleCamera")
 
-        if singleCamera:
-            self.createCamera("cam1", 1)
-        else:
-            for i in range(self.numberOfCameras):
-                self.createCamera("cam" + str(i), i)
+        # if singleCamera:
+        self.createCamera("cam1", 2)
+        # else:
+        #     for i in range(self.numberOfCameras):
+        #         print("Camera ", str(i))
+        #         self.createCamera("cam" + str(i), i)
 
     # TODO: cameraName is unused at this time but in the future could be used to identify a camera
     # TODO: add support for picam - to change False to True for picam

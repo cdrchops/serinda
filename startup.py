@@ -19,6 +19,8 @@ MergeCommandFiles().mergeFiles()
 os.system("snips-nlu generate-dataset en " + ApplicationConstants.serindaCommandsYmlFile + " > " + ApplicationConstants.serindaCommandsJsonFile)
 
 # if there is a utf-16 file then these next three commands would need to run
+# TODO: set the python name - idk how, but somehow
+# TODO: set the rm and cp based on OS b/c these won't work on windows
 os.system("python3 ./serinda/util/FileUtil.py")
 os.system("rm ./intents/serindaCommands.json")
 os.system("cp ./intents/serindaCommands2.json ./intents/serindaCommands.json")
