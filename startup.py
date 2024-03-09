@@ -1,6 +1,7 @@
 import os
 import webbrowser
 from sys import platform
+from enum import Enum #to do enum work in this file - overkill? maybe, but I want to do it this way... for now 9Mar24 wink
 
 # os.system("sh ./compileRust.sh")
 
@@ -12,30 +13,53 @@ from serinda.constants.ApplicationConstants import ApplicationConstants
 
 from serinda.util.MergeCommandFiles import MergeCommandFiles
 
+
 # merge all command files into one file
 MergeCommandFiles().mergeFiles()
 
 # running snips this way generates a utf-8 file
 os.system("snips-nlu generate-dataset en " + ApplicationConstants.serindaCommandsYmlFile + " > " + ApplicationConstants.serindaCommandsJsonFile)
 
-# if there is a utf-16 file then these next three commands would need to run
-# TODO: set the python name - idk how, but somehow
-# TODO: set the rm and cp based on OS b/c these won't work on windows
-os.system("python3 ./serinda/util/FileUtil.py")
-os.system("rm ./intents/serindaCommands.json")
-os.system("cp ./intents/serindaCommands2.json ./intents/serindaCommands.json")
+class Platform(Enum):
+    UNDEFINED = 0
+    LINUX = 1
+    MAC = 2
+    WINDOWS = 3
+
+PLATFORM = Platform.UNDEFINED
+
+if platform == "linux" or platform == "linux2":
+    PLATFORM = Platform.LINUX
+elif platform == "darwin":
+    PLATFORM = Platform.MAC
+elif platform == "win32":
+    PLATFORM = Platform.WINDOWS
+
+# TODO: maybe make this a property instead of OS dependent
+PYTHON_NAME = "python" if PLATFORM == Platform.WINDOWS else "python3"
+
+OS_DELETE_COMMAND = "rm"
+OS_COPY_COMMAND = "cp"
+
+if PLATFORM == Platform.WINDOWS:
+    OS_DELETE_COMMAND = "del"
+    OS_COPY_COMMAND = "copy"
+
+os.system(OS_DELETE_COMMAND + " ./intents/serindaCommands.json")
+os.system(OS_COPY_COMMAND + " ./intents/serindaCommands2.json ./intents/serindaCommands.json")
+os.system(PYTHON_NAME + " ./serinda/util/FileUtil.py")
 
 #END OF SNIPS CODE
 
 # determine os and installation
 url = "http://localhost:8000"
 browser = ""
-if platform == "linux" or platform == "linux2":
+if PLATFORM == Platform.LINUX:
     print("nothing here yet")
-elif platform == "darwin":
+elif PLATFORM == Platform.MAC:
     browser = "/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
     webbrowser.get("open -a" + browser + " %s").open(url)
-elif platform == "win32":
+elif PLATFORM == Platform.WINDOWS:
     # browser = 'C:/"Program Files (x86)"/Google/Chrome/Application/chrome.exe'
     os.system("start chrome " + url)
     # print("nothing here yet")
