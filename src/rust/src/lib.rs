@@ -20,7 +20,7 @@ pub fn print_something(s: *const c_char) {
     let r_str = c_str.to_str().unwrap();
 
     println!("{:?}", r_str);
-    println!("helloworld...");
+    println!("helloworld... I am death, destroyer of worlds... and DAVY JONES GIANT SQUID!");
 }
 
 #[no_mangle]

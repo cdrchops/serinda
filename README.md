@@ -1,4 +1,4 @@
-Updated 26Feb24
+sUpdated 26Feb24
 
 <h2>Graceland v3</h2>  
 SERINDA v3 will be affectionately known as [Graceland](https://winkdoubleguns.com/2024/02/22/serinda-v3-graceland/).  

@@ -5,10 +5,6 @@ from enum import Enum #to do enum work in this file - overkill? maybe, but I wan
 from serinda.constants.ApplicationConstants import ApplicationConstants
 from serinda.util.MergeCommandFiles import MergeCommandFiles
 
-# os.system("sh ./compileRust.sh")
-
-# os.system("sh ./test.sh")
-
 # merge all command files into one file
 MergeCommandFiles().mergeFiles()
 
@@ -51,11 +47,17 @@ os.system(OS_COPY_COMMAND + " " + os.path.join("intents", "serindaCommands2.json
 url = "http://localhost:8000"
 browser = ""
 if PLATFORM == Platform.LINUX:
+    # os.system("sh ./compileRust.sh")
+    # os.system("sh ./test.sh")
     print("nothing here yet")
 elif PLATFORM == Platform.MAC:
+    # os.system("sh ./compileRust.sh")
+    # os.system("sh ./test.sh")
     browser = "/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
     webbrowser.get("open -a" + browser + " %s").open(url)
 elif PLATFORM == Platform.WINDOWS:
+    os.system("compileRust.bat")
+    os.system("test.bat")
     # browser = 'C:/"Program Files (x86)"/Google/Chrome/Application/chrome.exe'
     os.system("start chrome " + url)
     # print("nothing here yet")
