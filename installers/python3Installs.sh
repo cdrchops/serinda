@@ -1,6 +1,6 @@
-python -m pip install -r ./requirements.txt
-python -m snips_nlu download en
-python -m textblob.download_corpora
+python3 -m pip install -r ./requirements.txt
+python3 -m snips_nlu download en
+python3 -m textblob.download_corpora
 
 #
 ##python -m pip install numpy==1.21.1
