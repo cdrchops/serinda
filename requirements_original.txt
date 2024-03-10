@@ -28,7 +28,7 @@ SpeechRecognition
 scikit-learn<0.23,>=0.21.1
 #PyAutoGUI~=0.9.50
 #pywinauto~=0.6.8
-urllib3==1.22
+urllib3==1.22s
 opencv-python
 jpype1
 pandas

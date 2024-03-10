@@ -2,17 +2,12 @@ import os
 import webbrowser
 from sys import platform
 from enum import Enum #to do enum work in this file - overkill? maybe, but I want to do it this way... for now 9Mar24 wink
+from serinda.constants.ApplicationConstants import ApplicationConstants
+from serinda.util.MergeCommandFiles import MergeCommandFiles
 
 # os.system("sh ./compileRust.sh")
 
 # os.system("sh ./test.sh")
-
-from serinda.constants.ApplicationConstants import ApplicationConstants
-
-# START OF SNIPS CODE
-
-from serinda.util.MergeCommandFiles import MergeCommandFiles
-
 
 # merge all command files into one file
 MergeCommandFiles().mergeFiles()
@@ -45,11 +40,12 @@ if PLATFORM == Platform.WINDOWS:
     OS_DELETE_COMMAND = "del"
     OS_COPY_COMMAND = "copy"
 
-os.system(OS_DELETE_COMMAND + " ./intents/serindaCommands.json")
-os.system(OS_COPY_COMMAND + " ./intents/serindaCommands2.json ./intents/serindaCommands.json")
-os.system(PYTHON_NAME + " ./serinda/util/FileUtil.py")
-
-#END OF SNIPS CODE
+#TODO: make these paths os independent
+os.system(OS_DELETE_COMMAND + " " + os.path.join("intents", "serindaCommands.json"))
+os.system(OS_COPY_COMMAND + " " + os.path.join("intents", "serindaCommands2.json") + " " + os.path.join("intents", "serindaCommands.json"))
+# the intent behind this next file is in the header of it - for now I'm commenting it out as it doesn't appear to be needed
+#     on windows
+# os.system(PYTHON_NAME + " .\\serinda\\util\\FileUtil.py")
 
 # determine os and installation
 url = "http://localhost:8000"
@@ -62,7 +58,6 @@ elif PLATFORM == Platform.MAC:
 elif PLATFORM == Platform.WINDOWS:
     # browser = 'C:/"Program Files (x86)"/Google/Chrome/Application/chrome.exe'
     os.system("start chrome " + url)
-    # print("nothing here yet")
     # print("nothing here yet")
 
 # this starts up the app and you get console logging just the same

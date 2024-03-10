@@ -2,8 +2,9 @@ import cv2
 # import imutils
 # from imutils.video import VideoStream
 import numpy as np
+import os
 
-face_cascade = cv2.CascadeClassifier("./haarcascade_frontalface_alt2.xml")
+face_cascade = cv2.CascadeClassifier(os.path.join("pretrained_models", "haarcascade_frontalface_alt2.xml"))
 ds_factor = 0.6
 
 
