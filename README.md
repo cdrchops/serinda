@@ -1,4 +1,8 @@
-sUpdated 26Feb24
+Updated 10Mar24
+
+### Installation
+python -m snips_nlu download en
+
 
 <h2>Graceland v3</h2>  
 SERINDA v3 will be affectionately known as [Graceland](https://winkdoubleguns.com/2024/02/22/serinda-v3-graceland/).  

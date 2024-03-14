@@ -11,6 +11,7 @@ from serinda.util.PropertiesFile import PropertiesFile
 from pathlib import Path
 
 from serinda.opencv.camerapool import CameraPool
+import os
 
 app = Flask(__name__)
 
@@ -141,3 +142,4 @@ if __name__ == '__main__':
     # java.lang.System.out.println("hello world")
 
 # shutdownJVM()
+os.system("deactivate")

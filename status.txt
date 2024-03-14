@@ -1,0 +1,5 @@
+cliapp==1.20180812.1
+Markdown==3.4.1
+Pygments==2.14.0
+PyYAML==6.0
+ttystatus==0.38

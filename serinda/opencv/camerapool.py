@@ -23,14 +23,14 @@ class CameraPool:
         self.runCameras = self.runCameras == "True"
 
         self.numberOfCameras = int(propertiesFile.get("number.of.cameras"))
-        print(str(self.numberOfCameras))
+        # print(str(self.numberOfCameras))
         singleCamera = propertiesFile.get("useSingleCamera")
 
         if singleCamera:
             self.createCamera("cam1", 1)
         else:
             for i in range(self.numberOfCameras):
-                print("Camera ", str(i))
+                # print("Camera ", str(i))
                 self.createCamera("cam" + str(i), i)
 
     # TODO: cameraName is unused at this time but in the future could be used to identify a camera
@@ -44,11 +44,12 @@ class CameraPool:
     def setCommand(self, command, nluIntentProcessor):
         intent = command
         tmpCamNumber = intent['slots'][0]['rawValue']
-
+        if tmpCamNumber == 'one':
+            tmpCamNumber = 1
         print("intent camera number ", tmpCamNumber)
 
         intentName = nluIntentProcessor.getIntentNameByRecognition(intent)
-        cameraNumber = int(tmpCamNumber) - 1 #intent[0].entities[0].value - 1
+        cameraNumber = tmpCamNumber - 1 #int(tmpCamNumber) - 1 #intent[0].entities[0].value - 1
         cam = self.cameras[cameraNumber]
 
         if intentName == 'showGrid':

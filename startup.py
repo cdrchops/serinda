@@ -5,12 +5,6 @@ from enum import Enum #to do enum work in this file - overkill? maybe, but I wan
 from serinda.constants.ApplicationConstants import ApplicationConstants
 from serinda.util.MergeCommandFiles import MergeCommandFiles
 
-# merge all command files into one file
-MergeCommandFiles().mergeFiles()
-
-# running snips this way generates a utf-8 file
-os.system("snips-nlu generate-dataset en " + ApplicationConstants.serindaCommandsYmlFile + " > " + ApplicationConstants.serindaCommandsJsonFile)
-
 class Platform(Enum):
     UNDEFINED = 0
     LINUX = 1
@@ -25,6 +19,19 @@ elif platform == "darwin":
     PLATFORM = Platform.MAC
 elif platform == "win32":
     PLATFORM = Platform.WINDOWS
+
+if PLATFORM == Platform.LINUX:
+    os.system("source ./debvenv/env/bin/activate")
+# elif PLATFORM == Platform.WINDOWS:
+#     print("right here")
+#     #c:\\projects\\serinda\\serindaMain\\
+#     os.system("venv\\Scripts\\activate")
+
+# merge all command files into one file
+MergeCommandFiles().mergeFiles()
+
+# running snips this way generates a utf-8 file
+os.system("snips-nlu generate-dataset en " + ApplicationConstants.serindaCommandsYmlFile + " > " + ApplicationConstants.serindaCommandsJsonFile)
 
 # TODO: maybe make this a property instead of OS dependent
 PYTHON_NAME = "python" if PLATFORM == Platform.WINDOWS else "python3"
@@ -64,4 +71,3 @@ elif PLATFORM == Platform.WINDOWS:
 
 # this starts up the app and you get console logging just the same
 os.system("python main.py --ip 0.0.0.0 --port 8000")
-
