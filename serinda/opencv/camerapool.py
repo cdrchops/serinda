@@ -44,8 +44,13 @@ class CameraPool:
     def setCommand(self, command, nluIntentProcessor):
         intent = command
         tmpCamNumber = intent['slots'][0]['rawValue']
+
+        #sometimes this number comes back as "one" and other times it's "1" - so this is a hacky way of making sure it works
         if tmpCamNumber == 'one':
             tmpCamNumber = 1
+        else:
+            tmpCamNumber = int(tmpCamNumber)
+
         print("intent camera number ", tmpCamNumber)
 
         intentName = nluIntentProcessor.getIntentNameByRecognition(intent)
