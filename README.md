@@ -1,5 +1,10 @@
 Updated 10Mar24
 
+TODO:
+    install depthai 
+    figure out what packages I still need to install to update the python packages and still startup the server
+    figure out why audio isn't working
+
 ### Installation
 python -m snips_nlu download en
 
