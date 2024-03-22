@@ -49,18 +49,25 @@ class CameraPool:
     # to give all cameras the same command
     def setCommand(self, command, nluIntentProcessor):
         intent = command
-        tmpCamNumber = intent['slots'][0]['rawValue']
 
-        #sometimes this number comes back as "one" and other times it's "1" - so this is a hacky way of making sure it works
-        if tmpCamNumber == 'one':
-            tmpCamNumber = 1
-        else:
-            tmpCamNumber = int(tmpCamNumber)
+        #TODO: fix the camera number here - I've temporarily broken it for OAK-D
+
+        # tmpCamNumber = 'one' #intent['slots'][0]['rawValue']
+        #
+        # #sometimes this number comes back as "one" and other times it's "1" - so this is a hacky way of making sure it works
+        # if tmpCamNumber == 'one':
+        #     tmpCamNumber = 1
+        # else:
+        #     tmpCamNumber = int(tmpCamNumber)
 
         intentName = nluIntentProcessor.getIntentNameByRecognition(intent)
-        cameraNumber = tmpCamNumber - 1 #int(tmpCamNumber) - 1 #intent[0].entities[0].value - 1
+        print(intentName)
+        print(intent)
+        cameraNumber = 0 #tmpCamNumber - 1 #int(tmpCamNumber) - 1 #intent[0].entities[0].value - 1
+        print(len(self.cameras))
         cam = self.cameras[cameraNumber]
 
+        # these should really be dynamic
         if intentName == 'showGrid':
             self.drawGrid = not self.drawGrid
 
@@ -111,6 +118,9 @@ class CameraPool:
             #     cam.addFilter('detectMotion', MotionDetector())
             # else:
             #     cam.removeFilter('detectMotion')
+        elif intentName == 'showTesseract':
+            #something is done here to call tesseract and display the contents - where Idk
+            print('no intent found')
 
     # to give a singular camera a command
     def setCommandOnCamera(self, command, cameraNumber):
