@@ -29,3 +29,6 @@ nluFactory=snips
 
 # this is to change it so that if I plug in the glasses camera then I want to use that camera
 singleCamera = True
+
+# use the OAK-D or not
+useOakD = True

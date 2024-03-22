@@ -142,4 +142,5 @@ if __name__ == '__main__':
     # java.lang.System.out.println("hello world")
 
 # shutdownJVM()
-os.system("deactivate")
+# deactivate the virtual environment
+# os.system("deactivate")

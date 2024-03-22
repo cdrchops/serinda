@@ -4,6 +4,7 @@ from serinda.opencv.videocamera import VideoCamera
 from serinda.plugin.OpenCVPlugin.filters.TimestampDisplayFilter import TimestampDisplayFilter
 from serinda.plugin.OpenCVPlugin.filters.barcodedetect import BarcodeDetect
 from serinda.plugin.OpenCVPlugin.filters.facedetection import FaceDetection
+from serinda.opencv.videocamera_depthai import VideoCameraDepthAI
 
 # import inspect module
 import inspect
@@ -26,9 +27,14 @@ class CameraPool:
         # print(str(self.numberOfCameras))
         singleCamera = propertiesFile.get("useSingleCamera")
 
-        if singleCamera:
+        useOakD = propertiesFile.get("useOakD")
+
+        if useOakD == "True":
+            camera = VideoCameraDepthAI(1, False)
+            self.cameras.append(camera)
+        elif singleCamera == "True":
             self.createCamera("cam1", 1)
-        else:
+        elif singleCamera == "True" and useOakD != "True":
             for i in range(self.numberOfCameras):
                 # print("Camera ", str(i))
                 self.createCamera("cam" + str(i), i)
@@ -50,8 +56,6 @@ class CameraPool:
             tmpCamNumber = 1
         else:
             tmpCamNumber = int(tmpCamNumber)
-
-        print("intent camera number ", tmpCamNumber)
 
         intentName = nluIntentProcessor.getIntentNameByRecognition(intent)
         cameraNumber = tmpCamNumber - 1 #int(tmpCamNumber) - 1 #intent[0].entities[0].value - 1

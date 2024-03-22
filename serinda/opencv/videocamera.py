@@ -57,6 +57,7 @@ class VideoCamera(object):
             # if we want to send back just the processed item we need to return the transparent_image
             # if we want to send back the processed image then we just send back the frame
             if showVideo:
+                print("SHOW VIDEO")
                 return self.process({**self.filters}, transparent_img, frame, ".png", self.params)
             else:
                 return self.process({**self.filters}, frame, frame, ".jpg", self.params)
