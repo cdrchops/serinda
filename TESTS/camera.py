@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 import os
 
-face_cascade = cv2.CascadeClassifier(os.path.join("pretrained_models", "haarcascade_frontalface_alt2.xml"))
+# face_cascade = cv2.CascadeClassifier(os.path.join("pretrained_models", "haarcascade_frontalface_alt2.xml"))
 ds_factor = 0.6
 
 
@@ -30,7 +30,7 @@ class VideoCamera(object):
         # transparent_img = np.zeros((640, 480, 4), dtype=np.uint8)
         # image = cv2.resize(image, None, fx=ds_factor, fy=ds_factor, interpolation=cv2.INTER_AREA)
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        face_rects = face_cascade.detectMultiScale(gray, 1.3, 5)
+        # face_rects = face_cascade.detectMultiScale(gray, 1.3, 5)
         # return face_rects
         # for (x, y, w, h) in face_rects:
         #     cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
@@ -38,4 +38,4 @@ class VideoCamera(object):
         #     break
 
         ret, jpeg = cv2.imencode('.png', image)
-        return (jpeg.tobytes(), face_rects)
+        return (jpeg.tobytes())#, face_rects)

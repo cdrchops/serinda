@@ -31,4 +31,4 @@ nluFactory=snips
 singleCamera = True
 
 # use the OAK-D or not
-useOakD = True
+useOakD = False

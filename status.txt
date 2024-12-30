@@ -3,3 +3,9 @@ Markdown==3.4.1
 Pygments==2.14.0
 PyYAML==6.0
 ttystatus==0.38
+
+
+
+h11==0.9.0
+httpx==0.13.3
+pypiwin32==223

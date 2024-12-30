@@ -4,6 +4,7 @@ TODO:
     install depthai 
     figure out what packages I still need to install to update the python packages and still startup the server
     figure out why audio isn't working
+	wink nlp? https://winkjs.org/wink-nlp/ instead of SNIPS?
 
 ### Installation
 python -m snips_nlu download en

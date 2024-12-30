@@ -21,11 +21,11 @@ elif platform == "win32":
     PLATFORM = Platform.WINDOWS
 
 if PLATFORM == Platform.LINUX:
-    os.system("source ./debvenv/env/bin/activate")
+    os.system("source /mnt/c/projects/debvenv/env/bin/activate")
 # elif PLATFORM == Platform.WINDOWS:
 #     print("right here")
 #     #c:\\projects\\serinda\\serindaMain\\
-#     os.system("venv\\Scripts\\activate")
+#     os.system("c:\\projects\\venv\\Scripts\\activate")
 
 # merge all command files into one file
 MergeCommandFiles().mergeFiles()

@@ -12,6 +12,7 @@ from pathlib import Path
 
 from serinda.opencv.camerapool import CameraPool
 import os
+from pathlib import Path
 
 app = Flask(__name__)
 
@@ -64,6 +65,10 @@ def index():
                            javascriptList=pluginJavascriptPaths,
                            menuList=pluginMenuPaths)
 
+@app.route('/file/', methods=['GET'])
+def get_file(path=''):
+    txt = Path('file://c:/projects/obsidianSync/reports/25Apr24.md').read_text()
+    return txt
 
 @app.route('/cmd')
 def cmd():
