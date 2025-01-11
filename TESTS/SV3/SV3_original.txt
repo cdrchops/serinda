@@ -1,0 +1,29 @@
+        with microphone as source:
+            recognizer.adjust_for_ambient_noise(source)
+            try:
+                audio = recognizer.listen(source, timeout=None)
+                transcript = recognizer.recognize_google(audio).lower()
+                if "hey paige" in transcript:
+                    print("Wake word detected. Listening for command...")
+                    with microphone as source:
+                        recognizer.adjust_for_ambient_noise(source)
+                        try:
+                            audio = recognizer.listen(source, timeout=5)  # 5-second timeout
+                            command = recognizer.recognize_google(audio)
+                            print(f"Command received: {command}")
+
+                            # Extract intent using Snips
+                            intent = get_intent_from_snips(command)
+
+                            # Send intent to Flask app
+                            response = requests.get(f"http://localhost:5000/cmd?cmd={intent}")
+
+                            # Speak response
+                            speak(response.text)
+
+                        except sr.WaitTimeoutError:
+                            print("No command received within timeout period.")
+                        except sr.UnknownValueError:
+                            print("Could not understand the command.")
+            except sr.UnknownValueError:
+                print("No wake word detected.")

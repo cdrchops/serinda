@@ -1,7 +1,8 @@
 from serinda.NLU.NLUFactory import NLUFactory
 from serinda.STT.SpeechRec import SpeechRec
 from serinda.plugin.PluginManager import PluginManager
-
+import pygame
+from pygame import mixer
 
 # TODO: separate out processes and return values to the page correctly
 # TODO: come up with a return object that can be used on the front end for nearly every response
@@ -13,9 +14,33 @@ class CommandProcessor:
         self.WAKE = "bob"
         self.pluginManager = PluginManager()
         self.nluIntentProcessor = NLUFactory().getIntentProcessor(nluFactoryName)
+        # Initialize Pygame
+        pygame.init()
+        # Initialize the mixer
+        mixer.init()
 
+    def speak(self, text):
+        self.engine.say(text)
+        self.engine.runAndWait()
 
     def processCommand(self, request, cameraPool):
+        # yield 'data:{}\n\n'.format("lang=en, text=I am ready.")
+        while True:
+            text = SpeechRec().record()
+            print(f"Text received: {text}")
+            if "hey paige" in text:
+                command = SpeechRec().record()
+                print(f"Command received: {command}")
+
+                intent = self.nluIntentProcessor.getIntent(text)
+
+                # Send intent to Flask app
+                response = request.get(f"http://localhost:5000/cmd?cmd={intent}")
+
+                # Speak response
+                speak(response.text)
+
+    def processCommand_SUSPEND(self, request, cameraPool):
         while True:
             text = SpeechRec().record()
             if text.count(self.WAKE) > 0:

@@ -1,4 +1,4 @@
-run.cameras=True
+run.cameras=False
 number.of.cameras=1
 
 # where your groovy install is

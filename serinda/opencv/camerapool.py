@@ -34,7 +34,7 @@ class CameraPool:
             self.cameras.append(camera)
         elif singleCamera == "True":
             self.createCamera("cam1", 1)
-        elif singleCamera == "True" and useOakD != "True":
+        elif singleCamera == "False" and useOakD != "True":
             for i in range(self.numberOfCameras):
                 # print("Camera ", str(i))
                 self.createCamera("cam" + str(i), i)

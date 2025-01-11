@@ -23,8 +23,10 @@ class SayIt:
             # HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-US_ZIRA_11.0
             # engine.setProperty('voice', voices[1].id)  # changing index, changes voices. 1 for female
             # changing index, changes voices. 1 for female
+            # self.engine.setProperty('voice',
+            #                         'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-US_ZIRA_11.0')
             self.engine.setProperty('voice',
-                                    'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-US_ZIRA_11.0')
+                                    'HKEY_LOCAL_MACHINE/SOFTWARE/Microsoft/Speech/Voices/Tokens/TTS_MS_EN-US_ZIRA_11.0')
 
     def say_loop(self):
         while True:

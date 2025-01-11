@@ -20,8 +20,8 @@ elif platform == "darwin":
 elif platform == "win32":
     PLATFORM = Platform.WINDOWS
 
-if PLATFORM == Platform.LINUX:
-    os.system("source /mnt/c/projects/debvenv/env/bin/activate")
+# if PLATFORM == Platform.LINUX:
+    # os.system("source ./startVenv.sh")
 # elif PLATFORM == Platform.WINDOWS:
 #     print("right here")
 #     #c:\\projects\\serinda\\serindaMain\\
@@ -51,23 +51,24 @@ os.system(OS_COPY_COMMAND + " " + os.path.join("intents", "serindaCommands2.json
 # os.system(PYTHON_NAME + " .\\serinda\\util\\FileUtil.py")
 
 # determine os and installation
-url = "http://localhost:8000"
-browser = ""
-if PLATFORM == Platform.LINUX:
-    # os.system("sh ./compileRust.sh")
-    # os.system("sh ./test.sh")
-    print("nothing here yet")
-elif PLATFORM == Platform.MAC:
-    # os.system("sh ./compileRust.sh")
-    # os.system("sh ./test.sh")
-    browser = "/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
-    webbrowser.get("open -a" + browser + " %s").open(url)
-elif PLATFORM == Platform.WINDOWS:
-    os.system("compileRust.bat")
-    os.system("test.bat")
-    # browser = 'C:/"Program Files (x86)"/Google/Chrome/Application/chrome.exe'
-    os.system("start chrome " + url)
-    # print("nothing here yet")
+# url = "http://localhost:8000"
+# browser = ""
+# if PLATFORM == Platform.LINUX:
+#     # os.system("sh ./compileRust.sh")
+#     # os.system("sh ./test.sh")
+#     # WSL
+#     os.system("cmd.exe /C start http://localhost:8000")
+# elif PLATFORM == Platform.MAC:
+#     # os.system("sh ./compileRust.sh")
+#     # os.system("sh ./test.sh")
+#     browser = "/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
+#     webbrowser.get("open -a" + browser + " %s").open(url)
+# elif PLATFORM == Platform.WINDOWS:
+#     os.system("compileRust.bat")
+#     os.system("test.bat")
+#     # browser = 'C:/"Program Files (x86)"/Google/Chrome/Application/chrome.exe'
+#     os.system("start chrome " + url)
+#     # print("nothing here yet")
 
 # this starts up the app and you get console logging just the same
 os.system("python main.py --ip 0.0.0.0 --port 8000")

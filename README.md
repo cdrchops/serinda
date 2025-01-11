@@ -1,16 +1,5 @@
-Updated 10Mar24
-
-TODO:
-    install depthai 
-    figure out what packages I still need to install to update the python packages and still startup the server
-    figure out why audio isn't working
-	wink nlp? https://winkjs.org/wink-nlp/ instead of SNIPS?
-
-### Installation
-python -m snips_nlu download en
-
-
 <h2>Graceland v3</h2>  
+Updated 10Mar24 <br/><br/>
 SERINDA v3 will be affectionately known as [Graceland](https://winkdoubleguns.com/2024/02/22/serinda-v3-graceland/).  
 A Mixed Reality (MR) platform that could potentially be downgraded to Augmented Reality (AR) only.  
   
@@ -45,6 +34,9 @@ A Mixed Reality (MR) platform that could potentially be downgraded to Augmented 
   
 ### Optical 
 - OAK-D
+
+### Installation
+python -m snips_nlu download en
   
 ### Features List  
 - verbal commands  
@@ -99,12 +91,7 @@ A Mixed Reality (MR) platform that could potentially be downgraded to Augmented 
 		- for selection of books to map citations  
 		- either digital or print books  
 		- tracks the "director box" hand gestures  ![[box-shape-made-out-of-hands-CXNDM7.jpg|100]]
-  
-### TODO List
-- update installs so that numpy doesn't break
-- set a setting so that you can say whether or not you have a raspberry pi - that way Rasspy can or can't be used
-- 
-  
+   
 ### Research Items  
 - https://voice2json.org/sentences.html    
 - https://www.jovo.tech/  
@@ -145,49 +132,6 @@ need to install OpenCV.
 python3 startup.py
 
 when running startup.py the server will start up in the terminal and open the url in an instance of chrome.  Then the page will keep attempting to connect until it can connect to the server
-
-
----
-<h2>What is still needed?</h2>
-There are only a few "basic" items that need to be done in order for this to be fully functional as a base for adding 
-plugins, optimizing code, etc.  Once these items are completed I'd consider SERINDA ready for prime testing.
-<br/><br/>
-1) OpenCV and WebGL to have the same camera perspective.  For now, I'm working on using OpenCV to adjust the camera 
-perspective of WebGL so they match.  Then ThreeJS elements placed in a scene will have the same look as if they were real.
-This also means that if an object 10 feet away has a HUD element then that will look like it's 10 feet away.
-<br/><br/>
-2) Simultaneous Location and Mapping (SLAM) and Visual Odometry (VO or VIO).<br/>
-I have successfully integrated a 9DOF sensor with the HMD.  There are tweaks to make, but the data works pretty well for 
-adjusting the camera view in ThreeJs.  I am working on integrating some version of SLAM (OpenVSLAM, ORB SLAM 2, ORB SLAM 3, idk).
-I'll also use a flavor of homography for a few elements since this is primarily going to be used indoors.  I'd like to
-have SLAM implemented and then remove the DOF sensor or use the DOF sensor to add more precision.<br/><br/>
-3) Object Detection and Object Recognition<br/>
-This is part of the HUD integration.  If I have an object that it detects and I want a specific HUD to overlay then I first 
-need the object to be detected.  There are many datasets out there for this from YOLO, Tiny YOLO, and more.  There is 
-more to this and will require some data be passed back to the front end for it to be used to display ThreeJs elements.
-<br/><br/>
-4) Interactive HUD elements<br/>
-This isn't difficult.  I have some that are in my experimental box still.  Some of this will be solved when 1 and 3 are 
-done then I'll add these experiments so users can interact with them.  Some are tied to real objects like a hand or wrist.
-Some are tied to the display like a HUD in a game would be.  And others are tied to objects like in 3 above.  This also
-means adding some sort of 3D GUI.
-<br/><br/>
-5) Dynamic loading of scenes and objects<br/>
-This can be done independent of the other items.  The user needs to be able to 
-CRUD 3D objects and then assign them to specific items and then those elements only display when those items are in view.
-For example, if I have a chair and I want a price to display over it.  I need to identify that it's a chair and what type
-of chair.  Then assign 3D elements to display in the HUD for that chair.  When that type of chair comes into view then
-the HUD I've chosen will display.  When the chair is no longer visible after x amount of time, then that HUD object is 
-removed from active memory.  In the future this could be used for items like walking into a furniture store and the store 
-sends the data to your HMD then as you're walking around you can see prices, maybe virtual items that you can "try out" in
-your own home, etc.  In the context of scenes, this could be like for a game.  You could create an AR game that's mapped
-to your house.  When you go to certain areas maybe med packs are there or hidden compartments.
-<br/><br/>
-6) Audio<br/>
-VOX controls work ok.  They're not great and if the browser is taxed then they don't work well at all.  Speech playback 
-sometimes works; you never know when it will work.  In order to be able to continue with the IPA portion and make this
-something fully functional the VOX portion (TTS and STT) need to work better.  Specifically this is referring to only
-the TTS and STT portions not the Rhasspy nor SNIPs intents.
 
 ---
 <h2>Integrations</h2>
@@ -274,3 +218,113 @@ Any code from PyImageSearch is licensed here - https://www.pyimagesearch.com/faq
 All LeapMotion code is licensed by the repo (I'll be adding more info on those later) otherwise it's licensed under
 https://www.ultraleap.com/vr-controller-mount-pricing-and-licensing/
 
+---
+### TODO List
+ ln -s ~/.pyenv/versions/3.8.20/bin/python python3
+- update installs so that numpy doesn't break
+- set a setting so that you can say whether or not you have a raspberry pi - that way Rasspy can or can't be used
+
+There are only a few "basic" items that need to be done in order for this to be fully functional as a base for adding 
+plugins, optimizing code, etc.  Once these items are completed I'd consider SERINDA ready for prime testing.
+<br/><br/>
+1) OpenCV and WebGL to have the same camera perspective.  For now, I'm working on using OpenCV to adjust the camera 
+perspective of WebGL so they match.  Then ThreeJS elements placed in a scene will have the same look as if they were real.
+This also means that if an object 10 feet away has a HUD element then that will look like it's 10 feet away.
+<br/><br/>
+2) Simultaneous Location and Mapping (SLAM) and Visual Odometry (VO or VIO).<br/>
+I have successfully integrated a 9DOF sensor with the HMD.  There are tweaks to make, but the data works pretty well for 
+adjusting the camera view in ThreeJs.  I am working on integrating some version of SLAM (OpenVSLAM, ORB SLAM 2, ORB SLAM 3, idk).
+I'll also use a flavor of homography for a few elements since this is primarily going to be used indoors.  I'd like to
+have SLAM implemented and then remove the DOF sensor or use the DOF sensor to add more precision.<br/><br/>
+3) Object Detection and Object Recognition<br/>
+This is part of the HUD integration.  If I have an object that it detects and I want a specific HUD to overlay then I first 
+need the object to be detected.  There are many datasets out there for this from YOLO, Tiny YOLO, and more.  There is 
+more to this and will require some data be passed back to the front end for it to be used to display ThreeJs elements.
+<br/><br/>
+4) Interactive HUD elements<br/>
+This isn't difficult.  I have some that are in my experimental box still.  Some of this will be solved when 1 and 3 are 
+done then I'll add these experiments so users can interact with them.  Some are tied to real objects like a hand or wrist.
+Some are tied to the display like a HUD in a game would be.  And others are tied to objects like in 3 above.  This also
+means adding some sort of 3D GUI.
+<br/><br/>
+5) Dynamic loading of scenes and objects<br/>
+This can be done independent of the other items.  The user needs to be able to 
+CRUD 3D objects and then assign them to specific items and then those elements only display when those items are in view.
+For example, if I have a chair and I want a price to display over it.  I need to identify that it's a chair and what type
+of chair.  Then assign 3D elements to display in the HUD for that chair.  When that type of chair comes into view then
+the HUD I've chosen will display.  When the chair is no longer visible after x amount of time, then that HUD object is 
+removed from active memory.  In the future this could be used for items like walking into a furniture store and the store 
+sends the data to your HMD then as you're walking around you can see prices, maybe virtual items that you can "try out" in
+your own home, etc.  In the context of scenes, this could be like for a game.  You could create an AR game that's mapped
+to your house.  When you go to certain areas maybe med packs are there or hidden compartments.
+<br/><br/>
+6) Audio<br/>
+VOX controls work ok.  They're not great and if the browser is taxed then they don't work well at all.  Speech playback 
+sometimes works; you never know when it will work.  In order to be able to continue with the IPA portion and make this
+something fully functional the VOX portion (TTS and STT) need to work better.  Specifically this is referring to only
+the TTS and STT portions not the Rhasspy nor SNIPs intents.
+
+- install depthai
+- figure out what packages I still need to install to update the python packages and still startup the server
+- figure out why audio isn't working
+- wink nlp? https://winkjs.org/wink-nlp/ instead of SNIPS?
+- Why can't I use the latest libraries?  Is it because one package hasn't been updated?
+- ffmpeg -i "http://10.255.255.254:8000/camera/mjpeg"-an output.mp4
+- LLAMA3
+	ollama run llama3.2-vision
+
+	localhost:11434
+
+	pip install unstructured[docx] langchain langchainhub langchain_community langchain-chroma
+
+	curl -fsSL https://ollama.com/install.sh | sh
+	https://ollama.com/download/linux
+	https://ollama.com/download/OllamaSetup.exe
+
+	curl http://localhost:11434/api/chat -d '{
+	  "model": "llama3.2-vision",
+	  "messages": [
+		{ "role": "user", "content": "What are God Particles?" }
+	  ],
+	  "stream": false
+	}'
+
+	check=$(curl -s -w "%{http_code}\n" -L "${localhost}${11434}/" -o /dev/null)
+	if [[ $check == 200 || $check == 403 ]]
+	then
+		# Service is online
+		echo "Service is online"
+		exit 0
+	else
+		# Service is offline or not working correctly
+		echo "Service is offline or not working correctly"
+		#exit 1
+	fi
+
+# TROUBLESHOOTING
+
+## REGEX
+To find pip versions and remove them from the requirements file 
+[=>~]=[0-9]{1,4}\.[0-9]{1,2}(\.[0-9]{1,4})?(\.[a-zA-Z0-9]{1,10})?
+ 
+## could not load library libcudnn_ops_infer.so.8 
+pip install torch==2.3.1 torchaudio==2.3.1 torchvision==0.18.1 --index-url https://download.pytorch.org/whl/cu118
+export LD_LIBRARY_PATH=`python3 -c 'import os; import nvidia.cublas.lib; import nvidia.cudnn.lib; import torch; print(os.path.dirname(nvidia.cublas.lib.__file__) + ":" + os.path.dirname(nvidia.cudnn.lib.__file__) + ":" + os.path.dirname(torch.__file__) +"/lib")'`
+
+## OPENAPI KEY
+https://platform.openai.com/api-keys
+
+## PYTTSX3
+https://stackoverflow.com/questions/29615235/pyttsx-no-module-named-engine
+https://puneet166.medium.com/how-to-added-more-speakers-and-voices-in-pyttsx3-offline-text-to-speech-812c83d14c13
+
+## SNIPS
+https://snips-nlu.readthedocs.io/en/latest/installation.html
+with latest python
+
+snips
+snips-nlu
+snips-nlu-metrics
+snips-nlu-parsers
+snips-nlu-utils
+snips_nlu_en
