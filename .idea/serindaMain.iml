@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="PYTHON_MODULE" version="4">
+  <component name="Flask">
+    <option name="enabled" value="true" />
+  </component>
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/venv" />
+    </content>
+    <orderEntry type="jdk" jdkName="Python 3.11.2 WSL (Debian): (/home/winkdoubleguns/.virtualenvs/process photos/bin/python)" jdkType="Python SDK" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="depthai_hand_tracker" />
+    <orderEntry type="module" module-name="depthai" />
+    <orderEntry type="module" module-name="ORIGINAL" />
+    <orderEntry type="module" module-name="serindaRewrite" />
+    <orderEntry type="module" module-name="depthai-experiments" />
+    <orderEntry type="module" module-name="wslinstalls" />
+    <orderEntry type="module" module-name="serindaInitialCheckin" />
+    <orderEntry type="module" module-name="depthai-slam" />
+    <orderEntry type="module" module-name="oak" />
+    <orderEntry type="module" module-name="sdk" />
+    <orderEntry type="module" module-name="depthai-tutorials" />
+    <orderEntry type="module" module-name="luxonis-ml" />
+    <orderEntry type="module" module-name="depthai-python" />
+    <orderEntry type="module" module-name="examples" />
+    <orderEntry type="module" module-name="TritonARlauncher-win32-x64" />
+    <orderEntry type="module" module-name="playing_with_oakdlite_camera" />
+    <orderEntry type="module" module-name="obsidian-templater-helpers" />
+    <orderEntry type="module" module-name="Captains_Voice_Commander" />
+    <orderEntry type="module" module-name="leon" />
+    <orderEntry type="module" module-name="leon-cli" />
+    <orderEntry type="module" module-name="aurora" />
+    <orderEntry type="module" module-name="svelte-flask-example" />
+    <orderEntry type="module" module-name="in-browser-markdown-editor" />
+    <orderEntry type="module" module-name="transliteration" />
+    <orderEntry type="module" module-name="transliteration" />
+    <orderEntry type="module" module-name="conceptBytes" />
+    <orderEntry type="module" module-name="serindaV2" />
+    <orderEntry type="module" module-name="serindaV2" />
+  </component>
+  <component name="TemplatesService">
+    <option name="TEMPLATE_CONFIGURATION" value="Jinja2" />
+  </component>
+</module>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../../Captains_Voice_Commander/.idea/Captains_Voice_Commander.iml" filepath="$PROJECT_DIR$/../../Captains_Voice_Commander/.idea/Captains_Voice_Commander.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../serindaHold/ORIGINAL/.idea/ORIGINAL.iml" filepath="$PROJECT_DIR$/../serindaHold/ORIGINAL/.idea/ORIGINAL.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../TritonARlauncher-win32-x64/.idea/TritonARlauncher-win32-x64.iml" filepath="$PROJECT_DIR$/../../TritonARlauncher-win32-x64/.idea/TritonARlauncher-win32-x64.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../aurora/.idea/aurora.iml" filepath="$PROJECT_DIR$/../../aurora/.idea/aurora.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../conceptBytes/.idea/conceptBytes.iml" filepath="$PROJECT_DIR$/../../conceptBytes/.idea/conceptBytes.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../depthai/.idea/depthai.iml" filepath="$PROJECT_DIR$/../../depthai/.idea/depthai.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../depthai-experiments/.idea/depthai-experiments.iml" filepath="$PROJECT_DIR$/../../depthai-experiments/.idea/depthai-experiments.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../depthai-python/.idea/depthai-python.iml" filepath="$PROJECT_DIR$/../../depthai-python/.idea/depthai-python.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../depthai-slam/.idea/depthai-slam.iml" filepath="$PROJECT_DIR$/../../depthai-slam/.idea/depthai-slam.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../depthai-tutorials/.idea/depthai-tutorials.iml" filepath="$PROJECT_DIR$/../../depthai-tutorials/.idea/depthai-tutorials.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../depthai_hand_tracker/.idea/depthai_hand_tracker.iml" filepath="$PROJECT_DIR$/../../depthai_hand_tracker/.idea/depthai_hand_tracker.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../speech_recognition/examples/.idea/examples.iml" filepath="$PROJECT_DIR$/../../speech_recognition/examples/.idea/examples.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../in-browser-markdown-editor/.idea/in-browser-markdown-editor.iml" filepath="$PROJECT_DIR$/../../in-browser-markdown-editor/.idea/in-browser-markdown-editor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../leon/.idea/leon.iml" filepath="$PROJECT_DIR$/../../leon/.idea/leon.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../leon-cli/.idea/leon-cli.iml" filepath="$PROJECT_DIR$/../../leon-cli/.idea/leon-cli.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../luxonis-ml/.idea/luxonis-ml.iml" filepath="$PROJECT_DIR$/../../luxonis-ml/.idea/luxonis-ml.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../sdk-examples/python/oak/.idea/oak.iml" filepath="$PROJECT_DIR$/../../sdk-examples/python/oak/.idea/oak.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../obsidianSync/assets/projectFiles/obsidian-templater-helpers/.idea/obsidian-templater-helpers.iml" filepath="$PROJECT_DIR$/../../obsidianSync/assets/projectFiles/obsidian-templater-helpers/.idea/obsidian-templater-helpers.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../playing_with_oakdlite_camera/.idea/playing_with_oakdlite_camera.iml" filepath="$PROJECT_DIR$/../../playing_with_oakdlite_camera/.idea/playing_with_oakdlite_camera.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../sdk/.idea/sdk.iml" filepath="$PROJECT_DIR$/../../sdk/.idea/sdk.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../serindaInitialCheckin/.idea/serindaInitialCheckin.iml" filepath="$PROJECT_DIR$/../serindaInitialCheckin/.idea/serindaInitialCheckin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/serindaMain.iml" filepath="$PROJECT_DIR$/.idea/serindaMain.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../serindaHold/serindaRewrite/.idea/serindaRewrite.iml" filepath="$PROJECT_DIR$/../serindaHold/serindaRewrite/.idea/serindaRewrite.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../serindaV2/.idea/serindaV2.iml" filepath="$PROJECT_DIR$/../serindaV2/.idea/serindaV2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../svelte-flask-example/.idea/svelte-flask-example.iml" filepath="$PROJECT_DIR$/../../svelte-flask-example/.idea/svelte-flask-example.iml" />
+      <module fileurl="file://D:/projects/CEDMAIN/cedproject/transliteration/.idea/transliteration.iml" filepath="D:/projects/CEDMAIN/cedproject/transliteration/.idea/transliteration.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../wslinstalls/.idea/wslinstalls.iml" filepath="$PROJECT_DIR$/../../wslinstalls/.idea/wslinstalls.iml" />
+    </modules>
+  </component>
+</project>
