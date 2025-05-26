@@ -1,0 +1,184 @@
+{#https://www.babylonjs-playground.com/#WQDLT5#6#}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Video Streaming with Babylon.js</title>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <style>
+        body { margin: 0; background: #222; }
+        #videoContainer {
+            position: relative;
+            width: 640px;
+            height: 480px;
+            margin: 20px auto;
+        }
+        #videoFeed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        #renderCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 640px;
+            height: 480px;
+        }
+        #instructions {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            max-width: 300px;
+        }
+        #instructions a { color: #00ff00; }
+    </style>
+</head>
+<body>
+    <div id="videoContainer">
+        <img id="videoFeed" src="{{ url_for('video_feed') }}" alt="Video Feed">
+        <canvas id="renderCanvas"></canvas>
+    </div>
+    <div id="instructions">
+        <h2>Live Video Stream</h2>
+        <p>Green boxes show detected faces. A billboard with "Hello!" should appear above the first face.</p>
+        <p>Say "hey flask" followed by a command to trigger speech recognition.</p>
+        <p>Check transcription at <a href="/recognize" target="_blank">/recognize</a>.</p>
+    </div>
+    <script>
+        const canvasOffsetX = 10;
+        const canvasOffsetY = 10;
+        const DEBUG = false;
+        const billboardDimensions = { width: 50, height: 50 }; // Adjusted for better visibility
+        const canvas = document.getElementById("renderCanvas");
+        const engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
+        canvas.style.pointerEvents = "none"; // Allow clicks to pass through
+
+        const debug = function(message) {
+            if (DEBUG)
+                console.log(message);
+        }
+
+        const createScene = function () {
+            const scene = new BABYLON.Scene(engine);
+            scene.clearColor = new BABYLON.Color4(0, 0, 0, 0); // Transparent background
+
+            // Camera (orthographic for 2D mapping)
+            const canvasWidth = 640;
+            const canvasHeight = 480;
+            const camera = new BABYLON.FreeCamera("camera", new BABYLON.Vector3(0, 0, -10), scene);
+            camera.mode = BABYLON.Camera.ORTHOGRAPHIC_CAMERA;
+            {#const camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 0, 0), scene);#}
+
+            {#const camera = new BABYLON.OrthographicCamera("camera", -canvasWidth / 2, canvasWidth / 2, -canvasHeight / 2, canvasHeight / 2, 0.1, 1000, scene);#}
+            camera.setTarget(BABYLON.Vector3.Zero());
+
+            // Light
+            const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+
+            // Billboard
+            const billboard = BABYLON.MeshBuilder.CreatePlane("billboard", billboardDimensions, scene);
+            const billboardMaterial = new BABYLON.StandardMaterial("billboardMat", scene);
+            let billboardTexture;
+
+            try {
+                billboardTexture = new BABYLON.DynamicTexture("dynamicTexture", { width: 55, height: 20 }, scene, true);
+                const ctx = billboardTexture.getContext();
+                ctx.fillStyle = "white";
+                ctx.fillRect(0, 0, 55, 20);
+                ctx.font = "bold 18px Arial";
+                ctx.fillStyle = "black";
+                ctx.fillText("Hello!", 10, 15);
+                billboardTexture.update();
+                debug("Dynamic texture created successfully");
+            } catch (e) {
+                console.error("Failed to create dynamic texture:", e);
+                billboardMaterial.diffuseColor = new BABYLON.Color3(1, 0, 0); // Red fallback
+            }
+
+            billboardMaterial.diffuseTexture = billboardTexture;
+            billboardMaterial.emissiveColor = new BABYLON.Color3(1, 1, 1);
+            billboardMaterial.backFaceCulling = false;
+            billboard.material = billboardMaterial;
+            billboard.isVisible = true; // Start visible for debugging
+            debug("Billboard initialized");
+
+            // Map pixel coordinates to canvas coordinates
+            const mapToCanvas = (x, y, videoWidth, videoHeight) => {
+                const normX = x / videoWidth;
+                const normY = y / videoHeight;
+                const canvasX = normX * canvasWidth - canvasWidth / 2;
+                const canvasY = -(normY * canvasHeight - canvasHeight / 2);
+                return { x: canvasX - canvasOffsetX, y: canvasY - canvasOffsetY}; // Offset y upward
+            };
+
+            // Update billboard position
+            let lastFaceUpdate = 0;
+            const updateBillboard = () => {
+                if (Date.now() - lastFaceUpdate < 100) return; // Limit to 10 FPS
+                lastFaceUpdate = Date.now();
+                fetch("/face_data")
+                    .then(response => {
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                        return response.json();
+                    })
+                    .then(data => {
+                        debug("Face data received:", data);
+                        if (data.faces && data.faces.length > 0) {
+                            const face = data.faces[0];
+                            const videoWidth = 640;
+                            const videoHeight = 480;
+                            const pos = mapToCanvas(face.x + face.w / 2, face.y, videoWidth, videoHeight);
+                            billboard.position = new BABYLON.Vector3(pos.x, pos.y, 0);
+                            billboard.isVisible = true;
+                            debug("Billboard positioned at:", pos);
+                        } else {
+                            billboard.isVisible = false;
+                            debug("No faces detected");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error fetching face data:", error);
+                        billboard.isVisible = false;
+                    });
+            };
+
+            scene.registerBeforeRender(() => {
+                updateBillboard();
+            });
+
+            return scene;
+        };
+
+        try {
+            const scene = createScene();
+            engine.runRenderLoop(() => {
+                scene.render();
+            });
+
+            debug("Babylon.js scene initialized");
+        } catch (e) {
+            console.error("Failed to initialize Babylon.js scene:", e);
+        }
+
+        window.addEventListener("resize", () => {
+            engine.resize();
+        });
+
+        // Debug video loading
+        const videoFeed = document.getElementById("videoFeed");
+        videoFeed.addEventListener("error", () => {
+            console.error("Video feed failed to load");
+        });
+        videoFeed.addEventListener("load", () => {
+            debug("Video feed loaded successfully");
+        });
+    </script>
+</body>
+</html>

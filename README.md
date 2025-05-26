@@ -14,6 +14,14 @@ From this point on, I will rework the installer, the startup, the Rust and C int
 
 I look forward to the last 7 years of work coming together better than it was before.
 
+
 ## PREVIOUS VERSIONS
 
 Previous versions used a system I developed for plugins.  Some of those plugins did slow down the system.  I also relied on the browser to provide access to speech.  Now, all speech is done in Python via either Google or Sphinx.
+
+
+## TODO
+- [x] Fix the babylon portion so the video feed shows AND the billboard displays
+https://github.com/Concept-Bytes
+- [ ] Add hand recognition from conceptbytes(?)
+- [ ] Continue development with OAK-D

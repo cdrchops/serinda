@@ -1,0 +1,68 @@
+sudo apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python3-openssl git build-essential zlib1g-dev libssl-dev liblzma-dev libncurses-dev tk-dev software-properties-common build-essential cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev python-dev-is-python3 libtbbmalloc2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev
+sudo apt-get install libzbar0
+sudo apt-get install default-jdk portaudio19-dev python3-pyaudio python3-opencv
+#python-numpy libjasper-dev libdc1394-22-dev
+
+## AUDIO
+# for windows
+# https://stackoverflow.com/questions/52283840/i-cant-install-pyaudio-on-windows-how-to-solve-error-microsoft-visual-c-14
+# https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyaudio
+# download the wheel matching your Python version
+# then pip3 install <whl name>
+
+# for linux
+# pip3 install pyaudio
+#pip3 install PyAudio # fix for debian
+
+## OPENCV
+#non-windows installs that may be needed
+#git clone https://github.com/opencv/opencv.git
+#cd ..
+#mkdir build
+#cd build
+#cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D WITH_GSTREAMER=ON -D WITH_FFMPEG=ON ../opencv
+#make -j8
+#sudo make install
+
+# manage python environments for use with virtual environment and Serinda
+# https://github.com/pyenv/pyenv-installer
+curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
+
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -bash)"
+eval "$(pyenv virtualenv-init -)"
+
+# https://github.com/pyenv/pyenv/wiki/Common-build-problems
+pyenv install 3.8.12
+
+#https://stackoverflow.com/questions/59549829/how-do-i-downgrade-my-version-of-python-from-3-7-5-to-3-6-5-on-ubuntu
+pyenv local 3.8.12
+
+#https://launchpad.net/~therealkenc/+archive/ubuntu/wsl-pulseaudio
+sudo apt-get install python3-launchpadlib
+sudo add-apt-repository ppa:therealkenc/wsl-pulseaudio
+sudo apt update
+
+sudo apt-get install build-essential pkg-config intltool libtool libsndfile1-dev libjson-c-dev
+
+# windows only
+# pip3 install msvc-runtime==14.34.31931
+# PySimpleGUI==4.60.3
+# pywin32==306
+# pywin32-ctypes==0.2.2
+# pywinpty==2.0.13
+
+# tensorflow - where I'll probably use pytorch, but just in case
+# tensorboard==2.14.0
+# tensorboard-data-server==0.7.2
+# tensorflow-estimator==2.13.0
+# tensorflow-io-gcs-filesystem==0.31.0
+
+# https://pgaskin.net/pulseaudio-win32/
+# https://research.wmz.ninja/articles/2017/11/setting-up-wsl-with-graphics-and-audio.html
+# https://www.reddit.com/r/bashonubuntuonwindows/comments/hrn1lz/wsl_sound_through_pulseaudio_solved/
+sudo apt-get install espeak
+pip install pyaudio
+
+

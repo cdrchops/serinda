@@ -7,7 +7,7 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/venv" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.11.2 WSL (Debian): (/home/winkdoubleguns/.virtualenvs/process photos/bin/python)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="C:\ProgramData\anaconda3" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="depthai_hand_tracker" />
     <orderEntry type="module" module-name="depthai" />
@@ -35,8 +35,6 @@
     <orderEntry type="module" module-name="transliteration" />
     <orderEntry type="module" module-name="transliteration" />
     <orderEntry type="module" module-name="conceptBytes" />
-    <orderEntry type="module" module-name="serindaV2" />
-    <orderEntry type="module" module-name="serindaV2" />
   </component>
   <component name="TemplatesService">
     <option name="TEMPLATE_CONFIGURATION" value="Jinja2" />
