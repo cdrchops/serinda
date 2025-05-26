@@ -1,10 +1,12 @@
 import cv2
 import numpy as np
+import os
 # from imutils.video import VideoStream
 
-face_cascade=cv2.CascadeClassifier("./pretrained_models/haarcascade_frontalface_alt2.xml")
+face_cascade=cv2.CascadeClassifier(os.path.join("pretrained_models", "haarcascade_frontalface_alt2.xml"))
 ds_factor=1 # was 0.6
 
+showVideo=False #as opposed to just black - you can view the video to see that it's calibrating correctly
 
 class VideoCamera(object):
     filters = dict()
@@ -26,7 +28,7 @@ class VideoCamera(object):
     def generate(self):
         while True:
             frame = self.get_frame()
-            
+
             if frame is not None:
                 yield (b'--frame\r\n'
                        b'Content-Type: image/png\r\n\r\n' + frame + b'\r\n\r\n')
@@ -54,7 +56,8 @@ class VideoCamera(object):
             # to cover the dictionary changed during iteration - passing the shallow copy {**self.filters} fixes it
             # if we want to send back just the processed item we need to return the transparent_image
             # if we want to send back the processed image then we just send back the frame
-            if True:
+            if showVideo:
+                print("SHOW VIDEO")
                 return self.process({**self.filters}, transparent_img, frame, ".png", self.params)
             else:
                 return self.process({**self.filters}, frame, frame, ".jpg", self.params)

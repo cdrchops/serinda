@@ -53,6 +53,6 @@ Thumbs.db
 jupyter
 
 target
-Cargol.lock
+Cargo.lock
 
 build

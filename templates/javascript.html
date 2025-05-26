@@ -73,34 +73,33 @@
         targetContainer.innerHTML = text;//"language = " + lang + " text is " + text;
     };
 
-/*
+
     var messageContainer = document.getElementById("messageContainer_div");
     var listenSource = new EventSource("/listen")
     listenSource.onmessage = function(e) {
         var dataReturned = e.data;
         var text = dataReturned.substring(dataReturned.indexOf("text=") + 5).trim();
-        var jsonText = JSON.parse(text);
-        var gyrox = jsonText.gyrox;
-        var gyroy = jsonText.gyroy;
-        var gyroz = jsonText.gyroz;
-
-        gyrox = gyrox/100;// * -1; // coordinate system Left or Right handed?
-        gyroy = 0;//gyroy/25*-1;
+        {#var jsonText = JSON.parse(text);#}
+        {#var gyrox = jsonText.gyrox;#}
+        {#var gyroy = jsonText.gyroy;#}
+        {#var gyroz = jsonText.gyroz;#}
+        {##}
+        {#gyrox = gyrox/100;// * -1; // coordinate system Left or Right handed?#}
+        {#gyroy = 0;//gyroy/25*-1;#}
         {#gyroz = gyroz/50;///100;// * -1;#}
-
-        var accelx = jsonText.accelx;
-        var accely = jsonText.accely;
-        var accelz = jsonText.accelz / 20;
-
-        var magx = jsonText.magx;
-        var magy = jsonText.magy;
-        var magz = jsonText.magz;
-
-        moveX(gyrox, gyroy, 0);
+        {##}
+        {#var accelx = jsonText.accelx;#}
+        {#var accely = jsonText.accely;#}
+        {#var accelz = jsonText.accelz / 20;#}
+        {##}
+        {#var magx = jsonText.magx;#}
+        {#var magy = jsonText.magy;#}
+        {#var magz = jsonText.magz;#}
+        {##}
+        {#moveX(gyrox, gyroy, 0);#}
 
         messageContainer.innerHTML = text;
-    };
-*/
+    }
 
     function callCommandProcessor(command) {
         if (command !== 'menu') {

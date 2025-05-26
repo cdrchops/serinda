@@ -1,0 +1,54 @@
+/* ---------------------- Dark-theme --------------------- */
+body.dark-theme {
+    background-color: var(--almost-black);
+}
+
+.dark-theme #icon-dark {
+    filter: invert(100%) brightness(200%);
+}
+
+.dark-theme #icon-light {
+    filter: none;
+}
+
+.dark-theme #markdown-input-section {
+    border-color: var(--bluish-gray);
+}
+
+.dark-theme #markdown-input-header,
+.dark-theme #preview-header,
+.dark-theme #delete-prompt-box {
+    background-color: var(--blackish-gray);
+}
+
+.dark-theme #markdown-input-header > label,
+.dark-theme #preview-header > label,
+.dark-theme #markdown-input,
+.dark-theme p,
+.dark-theme b,
+.dark-theme li,
+.dark-theme #del-msg,
+.dark-theme summary::marker {
+    color: var(--light-gray);
+}
+
+.dark-theme h1,
+.dark-theme h2,
+.dark-theme h3,
+.dark-theme h4,
+.dark-theme h5,
+.dark-theme blockquote > p,
+.dark-theme blockquote > p > a,
+.dark-theme code,
+.dark-theme #del-heading {
+    color: var(--white);
+}
+
+.dark-theme blockquote,
+.dark-theme pre {
+    background-color: var(--very-dark-gray);
+}
+
+.dark-theme #delete-prompt-box-bg {
+    background-color: hsla(216, 4%, 51%, 0.5);
+}

@@ -1,46 +1,396 @@
 {
-  "intents": [
-    {
-      "intent": "showCommands",
+  "entities": {
+    "cameraNumber": {
+      "automatically_extensible": true,
+      "data": [],
+      "matching_strictness": 1.0,
+      "use_synonyms": true
+    },
+    "snips/number": {}
+  },
+  "intents": {
+    "convertToDOP": {
       "utterances": [
-        "(show | display | hide) commands"
+        {
+          "data": [
+            {
+              "text": "convert usd to dop"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "convert to pesos"
+            }
+          ]
+        }
       ]
     },
-    {
-      "intent": "showGrid",
+    "convertToUSD": {
       "utterances": [
-        "(show | display | draw | hide) grid [(on | for)] camera {cameras:value!int}"
+        {
+          "data": [
+            {
+              "text": "convert dop to usd"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "convert to dollars"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "convert to usd"
+            }
+          ]
+        }
       ]
     },
-    {
-      "intent": "detectFaces",
+    "detectBarcode": {
       "utterances": [
-        "detect (face | faces) (on | for) camera {showGrid.cameras}"
+        {
+          "data": [
+            {
+              "text": "detect barcode"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "scan barcode"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "qr code"
+            }
+          ]
+        }
       ]
     },
-    {
-      "intent": "showTimestamp",
+    "detectMotion": {
       "utterances": [
-        "(show | hide | display) (time | timestamp) (on | for) camera {showGrid.cameras}"
+        {
+          "data": [
+            {
+              "text": "detect motion"
+            }
+          ]
+        }
       ]
     },
-    {
-      "intent": "trackObjectByGrid",
+    "faceDetect": {
       "utterances": [
-        "track object at {xRange:0..150} and {yRange:0..150} by {sizeOfArea:1..50}"
+        {
+          "data": [
+            {
+              "text": "detect faces"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "face detection"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "find faces"
+            }
+          ]
+        }
       ]
     },
-    {
-      "intent": "detectBarcode",
+    "hideCommands": {
       "utterances": [
-        "detect barcode (on | for) camera {showGrid.cameras}"
+        {
+          "data": [
+            {
+              "text": "hide commands"
+            }
+          ]
+        }
       ]
     },
-    {
-      "intent": "detectMotion",
+    "hideGrid": {
       "utterances": [
-        "detect motion (on | for) camera {showGrid.cameras}"
+        {
+          "data": [
+            {
+              "text": "hide grid"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "hide grid on camera "
+            },
+            {
+              "entity": "cameraNumber",
+              "slot_name": "cameraNumber",
+              "text": "0"
+            }
+          ]
+        }
+      ]
+    },
+    "hidePDF": {
+      "utterances": [
+        {
+          "data": [
+            {
+              "text": "hide PDF"
+            }
+          ]
+        }
+      ]
+    },
+    "hideTesseract": {
+      "utterances": [
+        {
+          "data": [
+            {
+              "text": "hide tesseract"
+            }
+          ]
+        }
+      ]
+    },
+    "recordVideo": {
+      "utterances": [
+        {
+          "data": [
+            {
+              "text": "record video"
+            }
+          ]
+        }
+      ]
+    },
+    "setGridSquare": {
+      "utterances": [
+        {
+          "data": [
+            {
+              "text": "record video"
+            }
+          ]
+        }
+      ]
+    },
+    "showCommands": {
+      "utterances": [
+        {
+          "data": [
+            {
+              "text": "show commands"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "display commands"
+            }
+          ]
+        }
+      ]
+    },
+    "showGrid": {
+      "utterances": [
+        {
+          "data": [
+            {
+              "text": "show grid"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "display grid"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "show grid on camera "
+            },
+            {
+              "entity": "snips/number",
+              "slot_name": "cameraNumber",
+              "text": "0"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "display grid on camera "
+            },
+            {
+              "entity": "snips/number",
+              "slot_name": "cameraNumber",
+              "text": "0"
+            }
+          ]
+        }
+      ]
+    },
+    "showPDF": {
+      "utterances": [
+        {
+          "data": [
+            {
+              "text": "display PDF"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "show PDF"
+            }
+          ]
+        }
+      ]
+    },
+    "showTesseract": {
+      "utterances": [
+        {
+          "data": [
+            {
+              "text": "show tesseract"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "display tesseract"
+            }
+          ]
+        }
+      ]
+    },
+    "testPluginRun": {
+      "utterances": [
+        {
+          "data": [
+            {
+              "text": "run test plugin"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "run test plugin# searchFlight Intent"
+            }
+          ]
+        }
+      ]
+    },
+    "timestamp": {
+      "utterances": [
+        {
+          "data": [
+            {
+              "text": "hide timestamp"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "hide time"
+            }
+          ]
+        }
+      ]
+    },
+    "trackObjectByGrid": {
+      "utterances": [
+        {
+          "data": [
+            {
+              "text": "track object at "
+            },
+            {
+              "entity": "snips/number",
+              "slot_name": "originX",
+              "text": "150"
+            },
+            {
+              "text": " and "
+            },
+            {
+              "entity": "snips/number",
+              "slot_name": "originY",
+              "text": "150"
+            },
+            {
+              "text": " by "
+            },
+            {
+              "entity": "snips/number",
+              "slot_name": "sizeOfArea",
+              "text": "50"
+            }
+          ]
+        }
+      ]
+    },
+    "translateToEnglish": {
+      "utterances": [
+        {
+          "data": [
+            {
+              "text": "translate to english"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "translate english"
+            }
+          ]
+        }
+      ]
+    },
+    "translateToSpanish": {
+      "utterances": [
+        {
+          "data": [
+            {
+              "text": "translate to spanish"
+            }
+          ]
+        },
+        {
+          "data": [
+            {
+              "text": "translate spanish"
+            }
+          ]
+        }
       ]
     }
-  ]
+  },
+  "language": "en"
 }

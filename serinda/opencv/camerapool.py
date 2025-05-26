@@ -4,7 +4,10 @@ from serinda.opencv.videocamera import VideoCamera
 from serinda.plugin.OpenCVPlugin.filters.TimestampDisplayFilter import TimestampDisplayFilter
 from serinda.plugin.OpenCVPlugin.filters.barcodedetect import BarcodeDetect
 from serinda.plugin.OpenCVPlugin.filters.facedetection import FaceDetection
+from serinda.opencv.videocamera_depthai import VideoCameraDepthAI
 
+# import inspect module
+import inspect
 
 class CameraPool:
     cameras = []
@@ -24,10 +27,16 @@ class CameraPool:
         # print(str(self.numberOfCameras))
         singleCamera = propertiesFile.get("useSingleCamera")
 
-        if singleCamera:
+        useOakD = propertiesFile.get("useOakD")
+
+        if useOakD == "True":
+            camera = VideoCameraDepthAI(1, False)
+            self.cameras.append(camera)
+        elif singleCamera == "True":
             self.createCamera("cam1", 1)
-        else:
+        elif singleCamera == "False" and useOakD != "True":
             for i in range(self.numberOfCameras):
+                # print("Camera ", str(i))
                 self.createCamera("cam" + str(i), i)
 
     # TODO: cameraName is unused at this time but in the future could be used to identify a camera
@@ -41,10 +50,24 @@ class CameraPool:
     def setCommand(self, command, nluIntentProcessor):
         intent = command
 
+        #TODO: fix the camera number here - I've temporarily broken it for OAK-D
+
+        # tmpCamNumber = 'one' #intent['slots'][0]['rawValue']
+        #
+        # #sometimes this number comes back as "one" and other times it's "1" - so this is a hacky way of making sure it works
+        # if tmpCamNumber == 'one':
+        #     tmpCamNumber = 1
+        # else:
+        #     tmpCamNumber = int(tmpCamNumber)
+
         intentName = nluIntentProcessor.getIntentNameByRecognition(intent)
-        cameraNumber = intent[0].entities[0].value - 1
+        print(intentName)
+        print(intent)
+        cameraNumber = 0 #tmpCamNumber - 1 #int(tmpCamNumber) - 1 #intent[0].entities[0].value - 1
+        print(len(self.cameras))
         cam = self.cameras[cameraNumber]
 
+        # these should really be dynamic
         if intentName == 'showGrid':
             self.drawGrid = not self.drawGrid
 
@@ -95,6 +118,9 @@ class CameraPool:
             #     cam.addFilter('detectMotion', MotionDetector())
             # else:
             #     cam.removeFilter('detectMotion')
+        elif intentName == 'showTesseract':
+            #something is done here to call tesseract and display the contents - where Idk
+            print('no intent found')
 
     # to give a singular camera a command
     def setCommandOnCamera(self, command, cameraNumber):
