@@ -21,6 +21,7 @@
       <module fileurl="file://$PROJECT_DIR$/../../sdk-examples/python/oak/.idea/oak.iml" filepath="$PROJECT_DIR$/../../sdk-examples/python/oak/.idea/oak.iml" />
       <module fileurl="file://$PROJECT_DIR$/../../obsidianSync/assets/projectFiles/obsidian-templater-helpers/.idea/obsidian-templater-helpers.iml" filepath="$PROJECT_DIR$/../../obsidianSync/assets/projectFiles/obsidian-templater-helpers/.idea/obsidian-templater-helpers.iml" />
       <module fileurl="file://$PROJECT_DIR$/../../playing_with_oakdlite_camera/.idea/playing_with_oakdlite_camera.iml" filepath="$PROJECT_DIR$/../../playing_with_oakdlite_camera/.idea/playing_with_oakdlite_camera.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../samples/.idea/samples.iml" filepath="$PROJECT_DIR$/../../samples/.idea/samples.iml" />
       <module fileurl="file://$PROJECT_DIR$/../../sdk/.idea/sdk.iml" filepath="$PROJECT_DIR$/../../sdk/.idea/sdk.iml" />
       <module fileurl="file://$PROJECT_DIR$/../serindaInitialCheckin/.idea/serindaInitialCheckin.iml" filepath="$PROJECT_DIR$/../serindaInitialCheckin/.idea/serindaInitialCheckin.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/serindaMain.iml" filepath="$PROJECT_DIR$/.idea/serindaMain.iml" />

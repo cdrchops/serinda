@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gesture Recognition with USB Camera</title>
+    <style>
+        #video, #renderCanvas {
+            width: 640px;
+            height: 480px;
+        }
+        #renderCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://docs.opencv.org/4.5.5/opencv.js"></script>
+</head>
+<body>
+    <video id="video" autoplay></video>
+    <canvas id="renderCanvas"></canvas>
+    <canvas id="cvCanvas" width="640" height="480" style="display:none;"></canvas>
+
+    <h1><a href="//webrtc.github.io/samples/" title="WebRTC samples homepage">WebRTC samples</a><span>Select sources &amp; outputs</span>
+    </h1>
+
+    <p>Get available audio, video sources and audio output devices from <code>mediaDevices.enumerateDevices()</code>
+        then set the source for <code>getUserMedia()</code> using a <code>deviceId</code> constraint.</p>
+    <p><b>Note:</b> without permission, the browser will restrict the available devices to at most one per type.</p>
+
+    <div class="select">
+        <label for="audioSource">Audio input source: </label><select id="audioSource"></select>
+    </div>
+
+    <div class="select">
+        <label for="audioOutput">Audio output destination: </label><select id="audioOutput"></select>
+    </div>
+
+    <div class="select">
+        <label for="videoSource">Video source: </label><select id="videoSource"></select>
+    </div>
+
+{#    <video id="video" playsinline autoplay></video>#}
+
+    <p><b>Note:</b> If you hear a reverb sound your microphone is picking up the output of your
+        speakers/headset, lower the volume and/or move the microphone further away from your speakers/headset.</p>
+
+    <script>
+        // Video and canvas setup
+        const video = document.getElementById('video');
+        const cvCanvas = document.getElementById('cvCanvas');
+        const ctx = cvCanvas.getContext('2d');
+
+        // Function to select and start webcam stream
+        async function startWebcam() {
+            try {
+                // Request initial permission to access any camera
+                const initialStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                // Stop the initial stream to free up the camera
+                initialStream.getTracks().forEach(track => track.stop());
+
+                // Enumerate devices to get camera list
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+
+                // Find USB camera (look for "USB" in label, case-insensitive)
+                let usbCamera = videoDevices.find(device => device.label.toLowerCase().includes('usb'));
+                if (!usbCamera) {
+                    console.warn('No USB camera found, falling back to default camera');
+                    usbCamera = videoDevices[0]; // Fallback to first available camera
+                }
+
+                // Start stream with selected camera
+                if (usbCamera) {
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: { deviceId: { exact: usbCamera.deviceId } }
+                    });
+                    video.srcObject = stream;
+                    console.log('Using camera:', usbCamera.label || 'Unknown');
+                } else {
+                    console.error('No video devices available');
+                }
+            } catch (error) {
+                console.error('Error accessing webcam:', error);
+            }
+        }
+
+        // Start the webcam
+        startWebcam();
+
+        // BabylonJS setup
+        const canvas = document.getElementById('renderCanvas');
+        const engine = new BABYLON.Engine(canvas, true);
+        const scene = new BABYLON.Scene(engine);
+        scene.clearColor = new BABYLON.Color4(0, 0, 0, 0);
+
+        const camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 0, -10), scene);
+        camera.setTarget(BABYLON.Vector3.Zero());
+
+        const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
+
+        // Billboard setup
+        const billboard = BABYLON.MeshBuilder.CreatePlane('billboard', { size: 1 }, scene);
+        const material = new BABYLON.StandardMaterial('material', scene);
+        material.diffuseColor = new BABYLON.Color3(1, 1, 1); // Default white
+        billboard.material = material;
+        billboard.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+        billboard.isVisible = false;
+
+        // Hand wireframe connections (MediaPipe landmarks)
+        const connections = [
+            [0,1], [1,2], [2,3], [3,4],      // Thumb
+            [0,5], [5,6], [6,7], [7,8],      // Index
+            [0,9], [9,10], [10,11], [11,12], // Middle
+            [0,13], [13,14], [14,15], [15,16], // Ring
+            [0,17], [17,18], [18,19], [19,20]  // Pinky
+        ];
+
+        // Hand lines
+        const handLines = connections.map((_, i) => {
+            const line = BABYLON.MeshBuilder.CreateLines(`handLine${i}`, {
+                points: [new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, 0)],
+                updatable: true,
+                color: new BABYLON.Color3(1, 0, 0)
+            }, scene);
+            line.isVisible = false;
+            return line;
+        });
+
+        // Gesture state
+        let currentGesture = 'none';
+
+        // Render loop with gesture-based color change
+        engine.runRenderLoop(() => {
+            if (billboard.isVisible) {
+                switch (currentGesture) {
+                    case 'fist':
+                        material.diffuseColor = new BABYLON.Color3(1, 0, 0); // Red
+                        break;
+                    case 'open':
+                        material.diffuseColor = new BABYLON.Color3(0, 1, 0); // Green
+                        break;
+                    case 'two_fingers':
+                        material.diffuseColor = new BABYLON.Color3(0, 0, 1); // Blue
+                        break;
+                    default:
+                        material.diffuseColor = new BABYLON.Color3(1, 1, 1); // White
+                }
+            }
+            scene.render();
+        });
+
+        // Coordinate mapping
+        const videoWidth = 640;
+        const videoHeight = 480;
+        const sceneWidth = 6;
+        const sceneHeight = 4.5;
+
+        function mapToScene(x, y) {
+            const sceneX = (x / videoWidth) * sceneWidth - sceneWidth / 2;
+            const sceneY = -((y / videoHeight) * sceneHeight - sceneHeight / 2);
+            return [sceneX, sceneY];
+        }
+
+        // Distance calculation in 2D (x, y) for simplicity
+        function distance(p1, p2) {
+            return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
+        }
+
+        // Gesture detection using all finger landmarks
+        function detectGesture(landmarks) {
+            const wrist = landmarks[0];
+            const fingers = [
+                { base: 2, tip: 4 }, // Thumb (use IP joint as base)
+                { base: 5, tip: 8 }, // Index
+                { base: 9, tip: 12 }, // Middle
+                { base: 13, tip: 16 }, // Ring
+                { base: 17, tip: 20 } // Pinky
+            ];
+
+            // Determine finger state (extended or curled)
+            const states = fingers.map(f => {
+                const base = landmarks[f.base];
+                const tip = landmarks[f.tip];
+                const dist_base_wrist = distance(wrist, base);
+                const dist_tip_wrist = distance(wrist, tip);
+                return dist_tip_wrist > dist_base_wrist * 1.2 ? 'extended' : 'curled';
+            });
+
+            // Count extended fingers
+            const extendedCount = states.filter(s => s === 'extended').length;
+
+            // Define gestures
+            if (extendedCount === 0) {
+                return 'fist'; // All fingers curled
+            } else if (extendedCount >= 4) {
+                return 'open'; // Most or all fingers extended
+            } else if (states[1] === 'extended' && states[2] === 'extended' && states[0] === 'curled' && states[3] === 'curled' && states[4] === 'curled') {
+                return 'two_fingers'; // Index and middle extended, others curled
+            } else {
+                return 'none';
+            }
+        }
+
+        // MediaPipe Hands setup
+        const hands = new Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
+        hands.setOptions({
+            maxNumHands: 1,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5
+        });
+        hands.onResults(onResults);
+
+        const cameraFeed = new Camera(video, {
+            onFrame: async () => await hands.send({ image: video }),
+            width: 640,
+            height: 480
+        });
+        cameraFeed.start();
+
+        // Hand tracking results
+        function onResults(results) {
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                const landmarks = results.multiHandLandmarks[0];
+                currentGesture = detectGesture(landmarks);
+                // Update hand lines
+                connections.forEach((conn, i) => {
+                    const p1 = landmarks[conn[0]];
+                    const p2 = landmarks[conn[1]];
+                    const [x1, y1] = mapToScene(p1.x * videoWidth, p1.y * videoHeight);
+                    const [x2, y2] = mapToScene(p2.x * videoWidth, p2.y * videoHeight);
+                    const points = [
+                        new BABYLON.Vector3(x1, y1, 0),
+                        new BABYLON.Vector3(x2, y2, 0)
+                    ];
+                    BABYLON.MeshBuilder.CreateLines(`handLine${i}`, {
+                        points,
+                        updatable: true,
+                        instance: handLines[i]
+                    }, scene);
+                    handLines[i].isVisible = true;
+                });
+            } else {
+                currentGesture = 'none';
+                handLines.forEach(line => line.isVisible = false);
+            }
+        }
+
+        // OpenCV.js face detection
+        let classifier;
+        cv['onRuntimeInitialized'] = async () => {
+            const response = await fetch('https://raw.githubusercontent.com/opencv/opencv/master/data/haarcascades/haarcascade_frontalface_default.xml');
+            const buffer = await response.arrayBuffer();
+            cv.FS_createDataFile('/', 'cascade.xml', new Uint8Array(buffer), true, false, false);
+            classifier = new cv.CascadeClassifier();
+            classifier.load('cascade.xml');
+            detectFaces();
+        };
+
+        function detectFaces() {
+            ctx.drawImage(video, 0, 0, 640, 480);
+            const imageData = ctx.getImageData(0, 0, 640, 480);
+            const src = cv.matFromImageData(imageData);
+            cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY);
+            const faces = new cv.RectVector();
+            classifier.detectMultiScale(src, faces);
+
+            {#cv.flip(src, 1);#}
+
+            if (faces.size() > 0) {
+                const face = faces.get(0);
+                const centerX = face.x + face.width / 2;
+                const centerY = face.y + face.height / 2;
+                const [sceneX, sceneY] = mapToScene(centerX, centerY);
+                billboard.position.set(sceneX, sceneY, 0);
+                billboard.isVisible = true;
+            } else {
+                billboard.isVisible = false;
+            }
+
+            src.delete();
+            faces.delete();
+            requestAnimationFrame(detectFaces);
+        }
+    </script>
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    <script src="/static/main.js" async></script>
+</body>
+</html>

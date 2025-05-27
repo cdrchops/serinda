@@ -6,8 +6,7 @@ import argparse
 import cv2
 import numpy as np
 import os
-
-import mediapipe as mp
+# import mediapipe as mp
 
 app = Flask(__name__)
 app.config['DEBUG'] = False
@@ -15,25 +14,25 @@ app.config['DEBUG'] = False
 # Initialize the recognizer
 recognizer = sr.Recognizer()
 
-# Initialize Mediapipe Hand solution
-mp_hands = mp.solutions.hands
-
-hands = mp_hands.Hands(static_image_mode=False,
-                       max_num_hands=2,
-                       min_detection_confidence=0.1,
-                       min_tracking_confidence=0.1)
-
-mp_drawing = mp.solutions.drawing_utils
+# # Initialize Mediapipe Hand solution
+# mp_hands = mp.solutions.hands
+#
+# hands = mp_hands.Hands(static_image_mode=False,
+#                        max_num_hands=2,
+#                        min_detection_confidence=0.1,
+#                        min_tracking_confidence=0.1)
+#
+# mp_drawing = mp.solutions.drawing_utils
 
 # Global variables
 RECOGNIZER_TYPE = None
 LATEST_RESULT = {"status": "none", "message": "No speech processed yet"}
 LATEST_FACES = []  # Store latest face coordinates
+LATEST_HANDS = []  # Store latest hand landmarks
 LOCK = threading.Lock()
 WAKE_WORD = "hey flask"
 CAMERA = cv2.VideoCapture(0)  # Initialize webcam
 DEBUG = False
-
 
 # Initialize Haar cascade for face detection
 cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
@@ -43,15 +42,16 @@ FACE_CASCADE = cv2.CascadeClassifier(cascade_path)
 if FACE_CASCADE.empty():
     raise RuntimeError("Failed to load Haar cascade file")
 
+
 def debug(msg):
     if DEBUG:
         print(msg)
+
 
 # Function to recognize speech
 def recognize_speech(audio):
     try:
         debug("Processing...")
-
         if RECOGNIZER_TYPE == "sphinx":
             text = recognizer.recognize_sphinx(audio)
         else:
@@ -77,14 +77,10 @@ def audio_listener():
                         text = recognizer.recognize_sphinx(audio).lower()
                     else:
                         text = recognizer.recognize_google(audio).lower()
-
                     if WAKE_WORD.lower() in text:
                         debug("Wake word detected! Recording...")
-
                         recognizer.adjust_for_ambient_noise(source, duration=1)
-
                         debug("Listening for command...")
-
                         audio = recognizer.listen(source, timeout=5, phrase_time_limit=10)
                         result = recognize_speech(audio)
                         with LOCK:
@@ -103,9 +99,10 @@ def audio_listener():
                     LATEST_RESULT = {"status": "error", "message": f"Audio listener error: {str(e)}"}
             time.sleep(0.1)  # Prevent excessive CPU usage
 
-# Function to generate video frames with face detection
+
+# Function to generate video frames with face and hand detection
 def generate_frames():
-    global LATEST_FACES
+    global LATEST_FACES, LATEST_HANDS
     while True:
         success, frame = CAMERA.read()
         if not success:
@@ -120,26 +117,31 @@ def generate_frames():
             with LOCK:
                 LATEST_FACES = [{"x": int(x), "y": int(y), "w": int(w), "h": int(h)} for (x, y, w, h) in faces]
 
-            # Draw bounding boxes
+            # Draw bounding boxes for faces
             for (x, y, w, h) in faces:
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
             # Flip the frame horizontally
-            # frame = cv2.flip(frame, 1)
+            frame = cv2.flip(frame, 1)
 
             # Process the RGB frame with MediaPipe Hands
-            results = hands.process(frame)
-
-            if results.multi_hand_landmarks:
-                for hand_landmarks in results.multi_hand_landmarks:
-                    # Draw landmarks
-                    mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
-
-            # Draw the hand annotations on the frame.
-            if results.multi_hand_landmarks:
-                for hand_landmarks in results.multi_hand_landmarks:
-                    # Draw landmarks
-                    mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+            # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            # results = hands.process(frame_rgb)
+            #
+            # # Update hand landmarks
+            # hand_data = []
+            # if results.multi_hand_landmarks:
+            #     for hand_landmarks in results.multi_hand_landmarks:
+            #         landmarks = []
+            #         for lm in hand_landmarks.landmark:
+            #             h, w, _ = frame.shape
+            #             cx, cy = int(lm.x * w), int(lm.y * h)  # Convert to pixel coordinates
+            #             landmarks.append({"x": cx, "y": cy, "z": lm.z})
+            #         hand_data.append({"landmarks": landmarks})
+            #         mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+            #
+            # with LOCK:
+            #     LATEST_HANDS = hand_data
 
             # Encode frame as JPEG
             ret, buffer = cv2.imencode('.jpg', frame)
@@ -168,6 +170,13 @@ def video_feed():
 def face_data():
     with LOCK:
         return jsonify({"faces": LATEST_FACES})
+
+
+# Flask route for hand landmarks
+@app.route('/hand_data', methods=['GET'])
+def hand_data():
+    with LOCK:
+        return jsonify({"hands": LATEST_HANDS})
 
 
 # Flask route to get latest transcription
@@ -203,3 +212,4 @@ if __name__ == '__main__':
         app.run(host='0.0.0.0', port=5000, debug=False, use_debugger=False, threaded=True)
     finally:
         CAMERA.release()
+        # hands.close()
