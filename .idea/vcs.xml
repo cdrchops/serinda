@@ -25,6 +25,5 @@
     <mapping directory="$PROJECT_DIR$/../serindaHold/serindaRewrite" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../../svelte-flask-example" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../../wslinstalls" vcs="Git" />
-    <mapping directory="D:/projects/CEDMAIN/cedproject/transliteration" vcs="Git" />
   </component>
 </project>
