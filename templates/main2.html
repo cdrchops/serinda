@@ -273,10 +273,19 @@
 
             {#cv.flip(src, 1);#}
 
+            // This calculation TODO: will determine object distance and then create a calculated amount of pixels to
+            //    move the box up to the top of the item
+            const calculation =  - 250;
+
+
             if (faces.size() > 0) {
                 const face = faces.get(0);
                 const centerX = face.x + face.width / 2;
-                const centerY = face.y + face.height / 2;
+                const centerY = face.y - (face.height + 10);// / 2;// + calculation
+
+                {#console.log(face.y);#}
+                {#console.log(face.height);#}
+
                 const [sceneX, sceneY] = mapToScene(centerX, centerY);
                 billboard.position.set(sceneX, sceneY, 0);
                 billboard.isVisible = true;
