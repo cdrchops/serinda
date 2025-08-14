@@ -49,6 +49,15 @@
         <label for="videoSource">Video source: </label><select id="videoSource"></select>
     </div>
 
+    <div class="select">
+        <label for="objectType">Object type: </label>
+        <select id="objectType">
+            <option value="face" selected>face</option>
+            <option value="bottle">bottle</option>
+            <option value="phone">phone</option>
+        </select>
+    </div>
+
 {#    <video id="video" playsinline autoplay></video>#}
 
     <p><b>Note:</b> If you hear a reverb sound your microphone is picking up the output of your
@@ -59,6 +68,7 @@
         const video = document.getElementById('video');
         const cvCanvas = document.getElementById('cvCanvas');
         const ctx = cvCanvas.getContext('2d');
+
 
         // Function to select and start webcam stream
         async function startWebcam() {
@@ -111,6 +121,25 @@
         // Object manager for multiple detected objects (e.g., faces)
         const objects = new Map(); // id -> { mesh, material, grabOffset, lastAngle }
         let activeObjectId = null; // id of the currently interacted object
+
+        // Object type dropdown handling (declared after 'objects' to avoid TDZ issues)
+        const objectSelect = document.getElementById('objectType');
+        let selectedObjectType = (objectSelect && objectSelect.value) ? objectSelect.value : 'face';
+        if (objectSelect) {
+            objectSelect.addEventListener('change', () => {
+                selectedObjectType = objectSelect.value;
+                // Hide meshes that are not of the selected type and reset active object if it doesn't match
+                objects.forEach(({ mesh }, id) => {
+                    if (!id.startsWith(`${selectedObjectType}_`)) {
+                        mesh.isVisible = false;
+                    }
+                });
+                if (activeObjectId && !activeObjectId.startsWith(`${selectedObjectType}_`)) {
+                    activeObjectId = null;
+                }
+                console.log('Selected object type:', selectedObjectType);
+            });
+        }
 
         function getOrCreateObject(id) {
             if (objects.has(id)) return objects.get(id);
@@ -393,7 +422,7 @@
                     const centerX = face.x + face.width / 2;
                     const centerY = face.y - face.height;
                     const [sceneX, sceneY] = mapToScene(centerX, centerY);
-                    const id = `face_${i}`;
+                    const id = `${selectedObjectType}_${i}`;
                     const entry = getOrCreateObject(id);
                     // Only update from face detection when not actively grabbing this object
                     if (!(isGrabbing && activeObjectId === id)) {
@@ -404,16 +433,16 @@
                 }
                 // Hide face objects not seen in this frame (unless being grabbed)
                 objects.forEach(({ mesh }, id) => {
-                    if (id.startsWith('face_') && !seenIds.has(id)) {
+                    if (id.startsWith(`${selectedObjectType}_`) && !seenIds.has(id)) {
                         if (!(isGrabbing && activeObjectId === id)) {
                             mesh.isVisible = false;
                         }
                     }
                 });
             } else {
-                // No faces: hide all face objects unless being grabbed
+                // No faces: hide all objects of the selected type unless being grabbed
                 objects.forEach(({ mesh }, id) => {
-                    if (id.startsWith('face_')) {
+                    if (id.startsWith(`${selectedObjectType}_`)) {
                         if (!(isGrabbing && activeObjectId === id)) {
                             mesh.isVisible = false;
                         }
