@@ -2,28 +2,5 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../../conceptBytes/HandTracking" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../../conceptBytes/HoloMat2" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../../conceptBytes/Holomat" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../../conceptBytes/HomePod" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../../conceptBytes/Jarvis" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../../conceptBytes/ai_plant" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../../depthai" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../../depthai-experiments" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../../depthai-python" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../../depthai-python/depthai-core" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../../depthai-python/depthai-core/shared/depthai-bootloader-shared" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../../depthai-python/depthai-core/shared/depthai-shared" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../../depthai-slam" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../../depthai-tutorials" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../../depthai/depthai_calibration" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../../depthai/resources/depthai_boards" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../../depthai_hand_tracker" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../../leon" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../../playing_with_oakdlite_camera" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../../samples" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../serindaHold/serindaRewrite" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../../svelte-flask-example" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../../wslinstalls" vcs="Git" />
   </component>
 </project>

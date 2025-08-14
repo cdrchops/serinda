@@ -134,6 +134,10 @@
 
         // Gesture state
         let currentGesture = 'none';
+        let isGrabbing = false;
+        let wasGrabbing = false;
+        let lastAngle = null;
+        let grabOffset = new BABYLON.Vector3(0, 0, 0);
 
         // Render loop with gesture-based color change
         engine.runRenderLoop(() => {
@@ -170,6 +174,9 @@
         // Distance calculation in 2D (x, y) for simplicity
         function distance(p1, p2) {
             return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
+        }
+        function distanceXY(x1, y1, x2, y2) {
+            return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
         }
 
         // Gesture detection using all finger landmarks
@@ -224,11 +231,12 @@
         });
         cameraFeed.start();
 
-        // Hand tracking results
+        // Hand tracking results + gesture interactions (pinch to grab, move, rotate)
         function onResults(results) {
             if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
                 const landmarks = results.multiHandLandmarks[0];
                 currentGesture = detectGesture(landmarks);
+
                 // Update hand lines
                 connections.forEach((conn, i) => {
                     const p1 = landmarks[conn[0]];
@@ -246,9 +254,62 @@
                     }, scene);
                     handLines[i].isVisible = true;
                 });
+
+                // Compute "pinch" between thumb tip (4) and index tip (8)
+                const thumbTip = landmarks[4];
+                const indexTip = landmarks[8];
+                const pinchDistanceNorm = distance(thumbTip, indexTip); // normalized space (0..1)
+                // Dynamic threshold scaled to video pixels for stability
+                const pinchPx = distanceXY(thumbTip.x * videoWidth, thumbTip.y * videoHeight, indexTip.x * videoWidth, indexTip.y * videoHeight);
+                const pinchThresholdPx = 35; // tune between 25-45 if needed
+
+                wasGrabbing = isGrabbing;
+                isGrabbing = pinchPx < pinchThresholdPx;
+
+                // Map index tip to scene coordinates for cursor/dragging
+                const [cursorX, cursorY] = mapToScene(indexTip.x * videoWidth, indexTip.y * videoHeight);
+                const cursor = new BABYLON.Vector3(cursorX, cursorY, 0);
+
+                if (isGrabbing && !wasGrabbing) {
+                    // On grab start: compute offset from cursor to object to avoid snapping
+                    grabOffset = billboard.position.subtract(cursor);
+
+                    // Initialize rotation tracking based on index finger direction (5 -> 8)
+                    const indexMCP = landmarks[5];
+                    const vX = (indexTip.x - indexMCP.x);
+                    const vY = (indexTip.y - indexMCP.y);
+                    lastAngle = Math.atan2(vY, vX);
+
+                    // Ensure the object is visible when grabbing
+                    billboard.isVisible = true;
+                }
+
+                if (isGrabbing) {
+                    // Move: follow cursor with offset
+                    billboard.position = cursor.add(grabOffset);
+
+                    // Rotate: compute angle delta from index finger orientation
+                    const indexMCP = landmarks[5];
+                    const vX = (indexTip.x - indexMCP.x);
+                    const vY = (indexTip.y - indexMCP.y);
+                    const angle = Math.atan2(vY, vX);
+                    if (lastAngle !== null) {
+                        const delta = angle - lastAngle;
+                        billboard.rotation.z += delta; // rotate around z axis
+                    }
+                    lastAngle = angle;
+                } else {
+                    // On release: reset rotation tracker
+                    if (wasGrabbing) {
+                        lastAngle = null;
+                    }
+                }
             } else {
                 currentGesture = 'none';
                 handLines.forEach(line => line.isVisible = false);
+                wasGrabbing = isGrabbing;
+                isGrabbing = false;
+                lastAngle = null;
             }
         }
 
@@ -281,16 +342,21 @@
             if (faces.size() > 0) {
                 const face = faces.get(0);
                 const centerX = face.x + face.width / 2;
-                const centerY = face.y - (face.height + 10);// / 2;// + calculation
+                const centerY = face.y - face.height;//(face.height + 10);// / 2;// + calculation
 
                 {#console.log(face.y);#}
                 {#console.log(face.height);#}
 
                 const [sceneX, sceneY] = mapToScene(centerX, centerY);
-                billboard.position.set(sceneX, sceneY, 0);
-                billboard.isVisible = true;
+                // Only update from face detection when not actively grabbing with hand
+                if (!isGrabbing) {
+                    billboard.position.set(sceneX, sceneY, 0);
+                    billboard.isVisible = true;
+                }
             } else {
-                billboard.isVisible = false;
+                if (!isGrabbing) {
+                    billboard.isVisible = false;
+                }
             }
 
             src.delete();
