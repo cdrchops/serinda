@@ -1,0 +1,15 @@
+{# camera section -- uncomment if you want to display all of the cameras #}
+<div style="display:table-row;">
+{% for item in range(cameraTotal) %}
+    <div style="display:table-cell" id="video{{ item }}"><img src="{{ url_for('video_feed') }}?id={{ item }}"></div>
+    {% if loop.index % 2 == 0 and loop.length > 2 %}
+        </div>
+        <div style="display:table-row">
+    {% endif %}
+{% endfor %}
+</div>
+
+{# plugin templates here in order of load #}
+{% for item in pathList %}
+    {% include item %}
+{% endfor %}

@@ -1,0 +1,54 @@
+@media screen and (min-width: 600px) and (max-width: 999px) {
+    body {
+        min-height: 100svh;
+    }
+    
+    #doc-name-editable {
+        width: 12.5rem;
+    }
+
+    #preview-content.hide-markdown {
+        margin: var(--r22) 3rem;
+    }
+}
+
+@media screen and (max-width: 599px) {
+    body {
+        min-height: 100svh;
+    }
+    
+    #brand-logo,
+    #divider,
+    #save-change-btn > span {
+        display: none;
+    }
+
+    #save-change-btn {
+        padding: var(--r12);
+    }
+    
+    #doc-name-editable {
+        width: 8rem;
+    }
+
+    .markdown-main-container {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    #markdown-content,
+    #preview-content,
+    #preview-content.hide-markdown {
+        margin: 1rem;
+    }
+
+    #markdown-input {
+        height: 100vh;
+    }
+
+    #preview-toggle {
+        position: absolute;
+        top: calc(4.5rem + var(--r12) + 0.5rem - 5px);
+        right: 1rem;
+    }
+}

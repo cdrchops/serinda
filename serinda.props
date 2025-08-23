@@ -1,0 +1,36 @@
+run.cameras=False
+number.of.cameras=1
+
+# where your groovy install is
+# windows
+groovyJar=C:/Program Files (x86)/Groovy/lib/groovy-3.0.2.jar
+
+# mac
+#groovyJar=~/.sdkman/candidates/groovy/3.0.6/lib/groovy-3.0.6.jar
+
+# where your compiled Java or Groovy files are
+javaFilePath=./build/classes/groovy/main/
+
+#video display width
+displayWidth=320
+
+#how much padding between the two videos so they overlap enough to give a 3d version
+paddingBetweenEyes=20%
+
+#flip the view so everything is backwards so it can be viewed in a mirrored display
+rotateViewsHorizontal=True
+
+#which eye to display Left,Right, Both
+whichEyeDisplay=Both
+
+# could be rhasspy or snips
+nluFactory=jsgf
+#snips
+#rhasspy
+#jsgf
+
+# this is to change it so that if I plug in the glasses camera then I want to use that camera
+singleCamera = True
+
+# use the OAK-D or not
+useOakD = False

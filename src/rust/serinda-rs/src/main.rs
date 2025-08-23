@@ -1,335 +1,128 @@
-use std::path::Path;
+use anyhow::{Context, Result};
+use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
+use hound;
+use reqwest::blocking::Client;
+use serde::Deserialize;
+use simple_transcribe_rs::{model_handler, transcriber};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
-use std::thread;
-
-use anyhow::{anyhow, Result};
-use clap::Parser;
-use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-use vosk::{Model, Recognizer};
 use tts::Tts;
-use actix_web::{post, web, App, HttpResponse, HttpServer, Responder};
-use reqwest;
-use serde::{Deserialize, Serialize};
-use tokio::sync::mpsc;
 
-#[derive(Parser, Debug)]
-struct Args {
-    #[arg(long)]
-    server_mode: bool,
-
-    #[arg(long, default_value = "http://127.0.0.1:5000/process")]
-    flask_url: String,
-
-    #[arg(long, default_value = "./models/vosk_model")]
-    vosk_path: String,
-
-    #[arg(long, default_value = "./models/vosk_small_model")]
-    wake_model: String,
-
-    #[arg(long, default_value = "hey grok")]
-    wake_word: String,
-}
-
-#[derive(Serialize, Deserialize)]
-struct ProcessRequest {
+#[derive(Deserialize)]
+struct TextResponse {
     text: String,
 }
 
-#[derive(Serialize, Deserialize)]
-struct IntentResponse {
-    intent: String,
-}
-
-#[derive(Serialize, Deserialize)]
-struct FlaskRequest {
-    intent: String,
-}
-
-#[derive(Serialize, Deserialize)]
-struct FlaskResponse {
-    response: String,
-}
-
-async fn get_intent_from_flask(text: &str, flask_url: &str) -> Result<String> {
-    let client = reqwest::Client::new();
-    let resp = client
-        .post(flask_url)
-        .json(&ProcessRequest { text: text.to_string() })
-        .send()
-        .await
-        .map_err(|e| anyhow!("Flask request error: {}", e))?;
-
-    let flask_res = resp
-        .json::<IntentResponse>()
-        .await
-        .map_err(|e| anyhow!("Flask response parse error: {}", e))?;
-
-    Ok(flask_res.intent)
-}
-
-#[post("/process")]
-async fn process_text(
-    body: web::Json<ProcessRequest>,
-    data: web::Data<AppData>,
-) -> impl Responder {
-    match get_intent_from_flask(&body.text, &data.flask_url).await {
-        Ok(intent) => {
-            let client = reqwest::Client::new();
-            match client
-                .post(&data.flask_url)
-                .json(&FlaskRequest {
-                    intent: intent.clone(),
-                })
-                .send()
-                .await
-            {
-                Ok(resp) => match resp.json::<FlaskResponse>().await {
-                    Ok(flask_res) => {
-                        if let Err(e) = play_tts(&data.tts, &flask_res.response) {
-                            log::error!("TTS error: {}", e);
-                            HttpResponse::InternalServerError().body("TTS playback failed")
-                        } else {
-                            HttpResponse::Ok().json(IntentResponse { intent })
-                        }
-                    }
-                    Err(e) => {
-                        log::error!("Flask response error: {}", e);
-                        HttpResponse::InternalServerError().body(format!("Flask response error: {}", e))
-                    }
-                },
-                Err(e) => {
-                    log::error!("Flask request error: {}", e);
-                    HttpResponse::InternalServerError().body(format!("Flask request error: {}", e))
-                }
-            }
-        }
-        Err(e) => {
-            log::error!("Flask intent error: {}", e);
-            HttpResponse::InternalServerError().body(format!("Flask intent error: {}", e))
-        }
-    }
-}
-
-#[post("/speak")]
-async fn speak_BlackJack_speak_text(
-body: web::Json<ProcessRequest>,
-data: web::Data<AppData>,
-) -> impl Responder {
-    match play_tts(&data.tts, &body.text) {
-    Ok(_) => HttpResponse::Ok().body("Spoken"),
-    Err(e) => {
-    log::error!("TTS error: {}", e);
-    HttpResponse::InternalServerError().body(format!("TTS error: {}", e))
-    }
-    }
-}
-
-struct AppData {
-    tts: Tts,
-    flask_url: String,
-}
-
-fn play_tts(tts: &Tts, text: &str) -> Result<()> {
-    tts.speak(text, false).map_err(|e| anyhow!("TTS error: {}", e))?;
-    Ok(())
-}
-
-#[derive(Clone)]
-enum ListenState {
-    Wake,
-    Command,
-}
-
-async fn run_server(app_data: AppData) -> Result<()> {
-    HttpServer::new(move || {
-        App::new()
-            .app_data(web::Data::new(app_data.clone()))
-            .service(process_text)
-            .service(speak_text)
-    })
-        .bind(("127.0.0.1", 8080))?
-        .run()
-        .await
-        .map_err(|e| anyhow!("Server error: {}", e))?;
-    Ok(())
-}
-
-fn run_audio_loop(
-    args: Args,
-    tts: Tts,
-    shutdown_rx: mpsc::Receiver<()>,
-) -> Result<()> {
-    let wake_model = Model::new(&args.wake_model)?;
-    let full_model = Model::new(&args.vosk_path)?;
-
+// Speech-to-Text: Record audio, transcribe, print, and send to Flask
+fn transcribe_and_send() -> Result<()> {
+    // Set up audio capture with cpal
     let host = cpal::default_host();
-    let device = host.default_input_device().ok_or(anyhow!("No input device"))?;
-    let config = device.default_input_config()?;
+    let device = host.default_input_device().context("No input device available")?;
+    let config = device.default_input_config().context("Failed to get default input config")?;
 
-    let sample_rate = config.sample_rate().0 as f32;
-    let channels = config.channels();
+    // Prepare a buffer to store audio data
+    let audio_data: Arc<Mutex<Vec<i16>>> = Arc::new(Mutex::new(Vec::new()));
+    let audio_data_clone = audio_data.clone();
 
-    if channels != 1 {
-        return Err(anyhow!("Only mono input supported"));
-    }
-
-    if config.sample_format() != cpal::SampleFormat::F32 {
-        return Err(anyhow!("Only f32 samples supported"));
-    }
-
-    let grammar = format!(r#"["{}"]"#, args.wake_word);
-    let wake_rec_base = Recognizer::new_with_grammar(&wake_model, sample_rate, &grammar)?;
-
-    let state = Arc::new(Mutex::new(ListenState::Wake));
-    let wake_rec = Arc::new(Mutex::new(wake_rec_base));
-    let full_rec: Arc<Mutex<Option<Recognizer>>> = Arc::new(Mutex::new(None));
-    let tts = Arc::new(Mutex::new(tts));
-
-    let flask_url = args.flask_url.clone();
-    let wake_word = args.wake_word.clone();
-
-    let err_fn = |err| log::error!("Stream error: {}", err);
-
+    // Build input stream
     let stream = device.build_input_stream(
         &config.into(),
-        move |data: &[f32], _: &cpal::InputCallbackInfo| {
-            let audio_i16: Vec<i16> = data
-                .iter()
-                .map(|&s| (s.clamp(-1.0, 1.0) * 32767.0) as i16)
-                .collect();
-
-            let current_state = state.lock().unwrap_or_else(|e| {
-                log::error!("Mutex poisoned: {}", e);
-                ListenState::Wake
-            });
-
-            match current_state {
-                ListenState::Wake => {
-                    let mut wr = wake_rec.lock().unwrap_or_else(|e| {
-                        log::error!("Mutex poisoned: {}", e);
-                        panic!("Recognizer mutex poisoned");
-                    });
-                    if wr.accept_waveform(&audio_i16) {
-                        if let Ok(res) = wr.result() {
-                            if res.text.trim().to_lowercase() == wake_word.to_lowercase() {
-                                log::info!("Wake word detected: {}", wake_word);
-                                let mut s = state.lock().unwrap_or_else(|e| {
-                                    log::error!("Mutex poisoned: {}", e);
-                                    panic!("State mutex poisoned");
-                                });
-                                *s = ListenState::Command;
-                                let mut fr = full_rec.lock().unwrap_or_else(|e| {
-                                    log::error!("Mutex poisoned: {}", e);
-                                    panic!("Recognizer mutex poisoned");
-                                });
-                                if let Ok(new_rec) = Recognizer::new(&full_model, sample_rate) {
-                                    *fr = Some(new_rec);
-                                } else {
-                                    log::error!("Failed to create full recognizer");
-                                }
-                            }
-                        }
-                    }
-                }
-                ListenState::Command => {
-                    let mut fr_opt = full_rec.lock().unwrap_or_else(|e| {
-                        log::error!("Mutex poisoned: {}", e);
-                        panic!("Recognizer mutex poisoned");
-                    });
-                    if let Some(ref mut rec) = *fr_opt {
-                        if rec.accept_waveform(&audio_i16) {
-                            if let Ok(res) = rec.final_result() {
-                                if !res.text.is_empty() {
-                                    log::info!("Recognized command: {}", res.text);
-
-                                    // Spawn async task to handle Flask requests
-                                    let flask_url = flask_url.clone();
-                                    let tts = Arc::clone(&tts);
-                                    let state = Arc::clone(&state);
-                                    let full_rec = Arc::clone(&full_rec);
-                                    let text = res.text.to_string();
-
-                                    tokio::spawn(async move {
-                                        let client = reqwest::Client::new();
-                                        match get_intent_from_flask(&text, &flask_url).await {
-                                            Ok(intent) => {
-                                                match client
-                                                    .post(&flask_url)
-                                                    .json(&FlaskRequest { intent })
-                                                    .send()
-                                                    .await
-                                                {
-                                                    Ok(resp) => match resp.json::<FlaskResponse>().await {
-                                                        Ok(flask_res) => {
-                                                            let tts = tts.lock().unwrap_or_else(|e| {
-                                                                log::error!("Mutex poisoned: {}", e);
-                                                                panic!("TTS mutex poisoned");
-                                                            });
-                                                            if let Err(e) = play_tts(&tts, &flask_res.response) {
-                                                                log::error!("TTS error: {}", e);
-                                                            }
-                                                        }
-                                                        Err(e) => log::error!("Flask response error: {}", e),
-                                                    },
-                                                    Err(e) => log::error!("Flask request error: {}", e),
-                                                }
-                                            }
-                                            Err(e) => log::error!("Flask intent error: {}", e),
-                                        }
-
-                                        let mut s = state.lock().unwrap_or_else(|e| {
-                                            log::error!("Mutex poisoned: {}", e);
-                                            panic!("State mutex poisoned");
-                                        });
-                                        *s = ListenState::Wake;
-                                        let mut fr = full_rec.lock().unwrap_or_else(|e| {
-                                            log::error!("Mutex poisoned: {}", e);
-                                            panic!("Recognizer mutex poisoned");
-                                        });
-                                        *fr = None;
-                                    });
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        move |data: &[i16], _: &cpal::InputCallbackInfo| {
+            let mut buffer = audio_data_clone.lock().unwrap();
+            buffer.extend_from_slice(data);
         },
-        err_fn,
-        Some(Duration::from_secs(300)),
+        |err| eprintln!("Error in stream: {}", err),
+        None,
     )?;
 
+    // Start recording
     stream.play()?;
-    shutdown_rx.blocking_recv().ok_or(anyhow!("Shutdown signal received"))?;
+    println!("Recording for 5 seconds...");
+    std::thread::sleep(Duration::from_secs(5));
+
+    // Stop recording
+    drop(stream);
+
+    // Get recorded data
+    let samples = audio_data.lock().unwrap().clone();
+
+    // Write to WAV file
+    let spec = hound::WavSpec {
+        channels: config.channels(),
+        sample_rate: config.sample_rate().0,
+        bits_per_sample: 16,
+        sample_format: hound::SampleFormat::Int,
+    };
+    let mut writer = hound::WavWriter::create("temp_recording.wav", spec)?;
+    for sample in samples {
+        writer.write_sample(sample)?;
+    }
+    writer.finalize()?;
+
+    // Transcribe using simple_transcribe_rs
+    let model = tokio::runtime::Runtime::new()
+        .unwrap()
+        .block_on(model_handler::ModelHandler::new("tiny", "models/"));
+    let trans = transcriber::Transcriber::new(model);
+    let result = trans.transcribe("temp_recording.wav", None)?;
+    let text = result.get_text();
+    // let result = trans.transcribe("temp_recording.wav", None).context("Transcription failed")?;
+    println!("Transcribed text: {}", text);
+
+    // Send to Flask server
+    let client = Client::new();
+    let mut map = std::collections::HashMap::new();
+    map.insert("text", text.as_str());
+    let res = client
+        .post("http://localhost:5000/transcription")
+        .json(&map)
+        .send()
+        .context("Failed to send to Flask")?;
+    println!("Server response: {:?}", res.status());
+
+    // Clean up
+    std::fs::remove_file("temp_recording.wav")?;
+
     Ok(())
 }
 
-#[tokio::main]
-async fn main() -> Result<()> {
-    // Initialize logging
-    env_logger::init();
+// Text-to-Speech: Fetch text from Flask and speak
+fn speak_text_from_flask(url: &str) -> Result<()> {
+    // Fetch JSON from Flask server
+    let response: TextResponse = reqwest::blocking::get(url)
+        .context("Failed to fetch from Flask server")?
+        .json()
+        .context("Failed to parse JSON response")?;
 
-    let args = Args::parse();
-    let tts = Tts::default().map_err(|e| anyhow!("TTS init error: {}", e))?;
+    // Initialize TTS
+    let mut tts = Tts::default().context("Failed to initialize TTS")?;
 
-    if args.server_mode {
-        let app_data = AppData {
-            tts,
-            flask_url: args.flask_url,
-        };
-        run_server(app_data).await
-    } else {
-        let (shutdown_tx, shutdown_rx) = mpsc::channel::<()>(1);
-        let result = run_audio_loop(args, tts, shutdown_rx);
+    // Speak the text (non-blocking)
+    tts.speak(&response.text, false).context("Failed to speak text")?;
 
-        // Allow graceful shutdown with Ctrl+C
-        ctrlc::set_handler(move || {
-            log::info!("Received shutdown signal");
-            shutdown_tx.blocking_send(()).unwrap();
-        })
-            .map_err(|e| anyhow!("Ctrl+C handler error: {}", e))?;
+    Ok(())
+}
 
-        result
+fn main() -> Result<()> {
+    // Parse command-line arguments
+    let args: Vec<String> = std::env::args().collect();
+    if args.len() < 2 {
+        println!("Usage: {} [stt|tts]", args[0]);
+        return Ok(());
+    }
+
+    match args[1].as_str() {
+        "stt" => {
+            println!("Running Speech-to-Text...");
+            transcribe_and_send()
+        }
+        "tts" => {
+            println!("Running Text-to-Speech...");
+            speak_text_from_flask("http://localhost:5000/get_text")
+        }
+        _ => {
+            println!("Invalid mode. Use 'stt' or 'tts'.");
+            Ok(())
+        }
     }
 }

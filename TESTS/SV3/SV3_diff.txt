@@ -1,0 +1,33 @@
+    while True:
+        text = SpeechRec().record()
+        if text.count(self.WAKE) > 0:
+            yield 'data:{}\n\n'.format("lang=en, text=I am ready.")
+            text = SpeechRec().record()
+
+            intent = self.nluIntentProcessor.getIntent(text)
+            intentName = self.nluIntentProcessor.getIntentNameByRecognition(intent)
+            # this is where tracking by grid is going to need to be adjusted since we're passing the data to the
+            #   command processes
+
+            yield 'data:{}\n\n'.format("lang=en, text=intent is " + intentName)
+            language = "en"
+
+            if intentName == '':
+                # sayIt.setLang("en")
+                # sayIt.sayIt("What was that? I didn't hear anything.")
+                yield 'data:{}\n\n'.format("lang=en, text=What was that? I didn't hear anything.")
+            else:
+                # [language, text] = self.pluginManager.processPlugins(intentName)
+
+            if language == "":
+                language = "en"
+
+            # hack b/c I couldn't get json to format correctly
+            formatItem = "lang=" + language + ", text=" + text
+
+            # sayIt.setLang(language)
+            # sayIt.sayIt(text)
+            yield 'data:{}\n\n'.format(formatItem)
+
+    recognizer = sr.Recognizer()
+    microphone = sr.Microphone()

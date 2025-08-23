@@ -1,0 +1,252 @@
+/* ---------------- Markdown main container --------------- */
+.markdown-main-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+#markdown-input-section {
+    border-width: 0 1px 0 0;
+    border-color: var(--light-gray);
+    border-style: solid;
+}
+
+#markdown-input-header,
+#preview-header {
+    background-color: var(--very-light-gray);
+    display: flex;
+    align-items: center;
+    height: var(--r42);
+    padding: var(--r12) 1rem;
+}
+
+#markdown-input-header > p,
+#preview-header > p {
+    color: var(--gray);
+    font-size: var(--r14);
+    font-weight: 500;
+    line-height: 1rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 0;
+}
+
+#preview-content {
+    margin: var(--r22) 1rem;
+}
+
+#markdown-content {
+    display: block; /*required as its a label tag*/
+    height: 100%;
+    margin: var(--r10) 1rem;
+}
+
+.markdown-main-container.hide-markdown {
+    grid-template-columns: 1fr;
+}
+
+#markdown-input-section.hide-markdown {
+    display: none;
+}
+
+#preview-content.hide-markdown {
+    margin: var(--r22) calc(25% + 1rem);
+}
+
+#markdown-input {
+    background-color: transparent;
+    border: none;
+    color: var(--dark-gray);
+    font-family: 'Roboto Mono', monospace;
+    font-weight: 400;
+    font-size: var(--r14);
+    line-height: 1.5rem;
+    outline: none;
+    overflow: auto;
+    width: 100%;
+    height: 100%;
+}
+
+#markdown-input::-webkit-scrollbar {
+    appearance: none;
+    display: none; /*to remove the space occupied by scrollbar*/
+}
+
+#preview-content {
+    font-family: 'Roboto Slab', serif;
+}
+
+#markdown-input-header, /* markdown-input-header part is for mobile version only*/
+#preview-header {
+    justify-content: space-between;
+}
+
+#preview-toggle {
+    cursor: pointer;
+    transition: .3s;
+}
+
+#preview-toggle:is(:hover, :focus) {
+    filter: invert(46%) sepia(11%) saturate(2448%) hue-rotate(314deg) brightness(109%) contrast(98%);
+}
+
+#preview-toggle > span {
+    display: block;
+    background: url('data:image/svg+xml,<svg width="16" height="12" xmlns="http://www.w3.org/2000/svg"><path d="M7.784.003c4.782-.144 7.597 4.31 8.109 5.198a.8.8 0 0 1 0 .8c-.688 1.2-3.255 5.086-7.677 5.198h-.2c-4.71 0-7.405-4.326-7.909-5.198a.8.8 0 0 1 0-.8C.803 4.001 3.362.115 7.784.003Zm.38 1.6h-.3c-3.199.08-5.286 2.71-6.086 3.998C2.482 6.73 4.73 9.68 8.176 9.6c3.199-.08 5.262-2.711 6.086-3.999-.712-1.127-2.967-4.086-6.398-3.998ZM8 2.803A2.799 2.799 0 1 1 8 8.4a2.799 2.799 0 0 1 0-5.598Zm0 1.599A1.2 1.2 0 1 0 8 6.8a1.2 1.2 0 0 0 0-2.4Z" fill="%237C8187"/></svg>');
+    background-repeat: no-repeat; 
+    background-position: center;
+    height: var(--r12);
+    width: 1rem;
+}
+
+#preview-toggle > span.hide { /*only appear on toggle*/
+    background: url('data:image/svg+xml,<svg width="16" height="15" xmlns="http://www.w3.org/2000/svg"><path d="M1.38.027a.795.795 0 0 1 .769.206L14.815 12.9a.792.792 0 0 1 0 1.124.792.792 0 0 1-1.124 0L9.234 9.567a2.77 2.77 0 0 1-3.753-3.753L1.024 1.357a.795.795 0 0 1 .357-1.33Zm.998 3.832 1.156 1.116a10.846 10.846 0 0 0-1.773 2.153c.696 1.117 2.929 4.038 6.333 3.959a6.127 6.127 0 0 0 1.346-.198l1.25 1.25a7.505 7.505 0 0 1-2.556.53h-.198c-4.663 0-7.331-4.282-7.83-5.145a.792.792 0 0 1 0-.792A12.58 12.58 0 0 1 2.378 3.86Zm5.328-2.272c4.726-.143 7.52 4.267 8.028 5.145.15.24.163.542.031.792a12.58 12.58 0 0 1-2.304 2.874l-1.195-1.116a10.846 10.846 0 0 0 1.813-2.154c-.705-1.116-2.937-4.045-6.333-3.958a6.127 6.127 0 0 0-1.346.198L5.149 2.117a7.505 7.505 0 0 1 2.557-.53Zm-.974 5.486v.055c0 .656.532 1.188 1.188 1.188l.047-.008-1.235-1.235Z" fill="%237C8187"/></svg>');
+    height: var(--r15);
+    width: 1rem;
+}
+
+/* -------------- Overriding default marked styles ------------- */
+h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: var(--r42);
+    margin-bottom: var(--r20);
+}
+
+h2 {
+    font-size: var(--r28);
+    font-weight: 300;
+    line-height: var(--r37);
+    margin-bottom: var(--r20);
+}
+
+h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 2rem;
+    margin-bottom: var(--r20);
+}
+
+h4 {
+    font-size: var(--r20);
+    font-weight: 700;
+    line-height: var(--r26);
+    margin-bottom: var(--r20);
+}
+
+h5 {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: var(--r21);
+    margin-bottom: var(--r20);
+}
+
+h6 {
+    color: var(--orange);
+    font-size: var(--r14);
+    font-weight: 700;
+    line-height: var(--r18);
+    margin-bottom: var(--r20);
+}
+
+p, li, b {
+    color: var(--gray);
+    font-size: var(--r14);
+    font-weight: 400;
+    line-height: 1.5rem;
+}
+
+p {
+    margin-bottom: var(--r20);
+}
+
+li {
+    padding: 0 0 4px 8px;
+}
+
+ul > li::marker,
+summary::marker {
+    color: var(--orange);
+    font-size: var(--r12);
+}
+
+ol, ul {
+    margin-bottom: 1rem;
+}
+
+blockquote {
+    background-color: var(--whitish-gray);
+    border-left: 5px solid var(--orange);
+    margin-bottom: var(--r20);
+    padding: 0;
+}
+
+blockquote > p {
+    color: var(--very-dark-gray);
+    font-weight: 700;
+    margin-bottom: 0;
+    padding: 1.5rem;
+}
+
+blockquote > p > a {
+    color: var(--very-dark-gray);
+}
+
+code {
+    color: var(--very-dark-gray);
+}
+
+pre {
+    background-color: var(--whitish-gray);
+    padding: 1.5rem;
+}
+
+/* ------------------- Delete-prompt box ----------------- */
+#delete-prompt-box-bg {
+    background-color: hsla(225, 9%, 9%, 0.5);
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+}
+
+#delete-prompt-box {
+    background-color: var(--white);
+    border-radius: 4px;
+    padding: 1.5rem;
+    position: absolute;
+    top: calc(50% - var(--r218)/2);
+    left: calc(50% - var(--r340)/2);
+    width: var(--r340);
+    z-index: 100;
+}
+
+#del-heading {
+    color: var(--very-dark-gray);
+    font-size: var(--r20);
+    font-weight: 700;
+    line-height: var(--r26);
+    margin-bottom: 1rem;
+}
+
+#del-msg {
+    font-size: var(--r14);
+    font-weight: 400;
+    line-height: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+#cfm-n-del-btn {
+    background-color: var(--orange);
+    border: none;
+    border-radius: 4px;
+    color: var(--white);
+    width: 100%;
+    padding: var(--r10) 0 var(--r12) 0;
+    transition: .3s;
+}
+
+#cfm-n-del-btn:is(:hover, :focus) {
+    background-color: var(--orange-hover);
+}

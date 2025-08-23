@@ -1,0 +1,42 @@
+#JSGF V1.0;
+
+grammar example;
+
+public <turn_on> = (turn on | switch on) (the | a) <device>;
+public <turn_off> = (turn off | switch off) (the | a) <device>;
+
+<device> = light | fan | radio;
+
+// Rule for showCommands intent
+public <showCommands> = (show | display | hide) commands;
+
+// Rule for showGrid intent
+public <showGrid> = (show | display | draw | hide) grid [(on | for)] camera <cameras>{value};
+
+// Rule for detectFaces intent
+public <detectFaces> = detect (face | faces) (on | for) camera <cameras>{value};
+
+// Rule for showTimestamp intent
+public <showTimestamp> = (show | hide | display) (time | timestamp) (on | for) camera <cameras>{value};
+
+// Rule for trackObjectByGrid intent
+//public <trackObjectByGrid> = track object at <xRange>{xRange} and <yRange>{yRange} by <sizeOfArea>{sizeOfArea};
+
+// Rule for detectBarcode intent
+public <detectBarcode> = detect barcode (on | for) camera <cameras>{value};
+
+// Rule for detectMotion intent
+public <detectMotion> = detect motion (on | for) camera <cameras>{value};
+
+// Reusable rule for cameras
+<cameras> = (
+    one{1} | two{2} | three{3} | four{4} | five{5} |
+    six{6} | seven{7} | eight{8} | nine{9} |
+    1{1} | 2{2} | 3{3} | 4{4} | 5{5} |
+    6{6} | 7{7} | 8{8} | 9{9}
+);
+
+// Placeholder rules for number ranges (to be expanded or handled externally)
+// <xRange> = (zero | one | two | ... | one hundred fifty);
+// <yRange> = (zero | one | two | ... | one hundred fifty);
+// <sizeOfArea> = (one | two | three | ... | fifty);
