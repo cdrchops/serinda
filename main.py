@@ -125,7 +125,7 @@ def listen():
     return Response(stream(), mimetype='text/event-stream')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port='8000', debug=True)
+    create_app().run(host='0.0.0.0', port='8000', debug=True)
     # working jpype with Java and Groovy
     # https://stackoverflow.com/questions/60964308/call-java-method-in-python-with-jpype
     # startJVM("-ea", classpath=[propertiesFile.get('groovyJar'), propertiesFile.get('javaFilePath')])
