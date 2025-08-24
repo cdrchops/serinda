@@ -1,0 +1,12 @@
+---
+type: intent
+name: showTesseract
+utterances:
+  - show tesseract
+  - display tesseract
+
+---
+type: intent
+name: hideTesseract
+utterances:
+  - hide tesseract

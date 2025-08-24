@@ -1,0 +1,1 @@
+// $('#commandDiv').hide();

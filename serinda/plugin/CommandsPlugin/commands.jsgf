@@ -1,0 +1,5 @@
+
+
+public <showCommands> = (show | display) commands;
+public <hideCommands> = hide commands;
+
