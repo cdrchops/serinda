@@ -1,0 +1,81 @@
+#JSGF V1.0;
+
+grammar sentences;
+
+// Rule for showCommands intent
+public <showCommands> = (show commands | display commands);
+
+// Rule for hideCommands intent
+public <hideCommands> = hide commands;
+
+// Rule for convertToDOP intent
+public <convertToDOP> = (convert usd to dop | convert to pesos);
+
+// Rule for convertToUSD intent
+public <convertToUSD> = (convert dop to usd | convert to dollars | convert to usd);
+
+// Rule for showGrid intent
+public <showGrid> = (
+    show grid |
+    display grid |
+    show grid on camera <number>{cameraNumber} |
+    display grid on camera <number>{cameraNumber}
+);
+
+// Rule for hideGrid intent
+public <hideGrid> = (
+    hide grid |
+    hide grid on camera <number>{cameraNumber}
+);
+
+// Rule for detectBarcode intent
+public <detectBarcode> = (detect barcode | scan barcode | qr code);
+
+// Rule for detectMotion intent
+public <detectMotion> = detect motion;
+
+// Rule for faceDetect intent
+public <faceDetect> = (detect faces | face detection | find faces);
+
+// Rule for timestamp intent (merged show and hide)
+public <timestamp> = (
+    show timestamp |
+    display timestamp |
+    show time |
+    display time |
+    hide timestamp |
+    hide time
+);
+
+// Rule for recordVideo intent
+public <recordVideo> = record video;
+
+// Rule for setGridSquare intent
+public <setGridSquare> = record video;
+
+// Rule for trackObjectByGrid intent
+public <trackObjectByGrid> = track object at <number>{originX} and <number>{originY} by <number>{sizeOfArea};
+
+// Rule for showPDF intent
+public <showPDF> = (display PDF | show PDF);
+
+// Rule for hidePDF intent
+public <hidePDF> = hide PDF;
+
+// Rule for showTesseract intent
+public <showTesseract> = (show tesseract | display tesseract);
+
+// Rule for hideTesseract intent
+public <hideTesseract> = hide tesseract;
+
+// Rule for testPluginRun intent
+public <testPluginRun> = (run test plugin);
+
+// Rule for translateToEnglish intent
+public <translateToEnglish> = (translate to english | translate english);
+
+// Rule for translateToSpanish intent
+public <translateToSpanish> = (translate to spanish | translate spanish);
+
+// Placeholder rule for numbers (snips/number)
+<number> = (zero | one | two | three | four | five | six | seven | eight | nine | ten);

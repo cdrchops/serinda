@@ -23,11 +23,8 @@ rotateViewsHorizontal=True
 #which eye to display Left,Right, Both
 whichEyeDisplay=Both
 
-# could be rhasspy or snips
+# could be rhasspy or snips jsgf
 nluFactory=jsgf
-#snips
-#rhasspy
-#jsgf
 
 # this is to change it so that if I plug in the glasses camera then I want to use that camera
 singleCamera = True

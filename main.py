@@ -8,8 +8,6 @@ import jinja2
 from serinda.util.CommandProcessor import CommandProcessor
 from serinda.util.PropertiesFile import PropertiesFile
 
-from pathlib import Path
-
 from serinda.opencv.camerapool import CameraPool
 import os
 from pathlib import Path
@@ -56,7 +54,6 @@ cameraPool = CameraPool(propertiesFile)
 
 messages = []
 
-
 @app.route('/')
 def index():
     return render_template('index.html',
@@ -76,18 +73,15 @@ def cmd():
     commandProcessor.processCommand2(cameraPool, text)
     return jsonify(result="success", status="success")
 
-
 @app.route('/video_feed')
 def video_feed():
     cameraNumber = request.args.get("id", "", type=int)
     return Response(cameraPool.getCamera(cameraNumber).generate(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
-
 @app.route('/stream')
 def stream():
     return Response(commandProcessor.processCommand(request, cameraPool), mimetype="text/event-stream")
-
 
 @app.route("/dofdata", methods=['GET', 'POST'])
 def dofdata():
@@ -117,7 +111,6 @@ def dofdata():
 
     return jsonify(result="success", status="success")
 
-
 @app.route('/listen', methods=['GET'])
 def listen():
     def stream():
@@ -130,7 +123,6 @@ def listen():
                     messages.remove(message)
 
     return Response(stream(), mimetype='text/event-stream')
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port='8000', debug=True)

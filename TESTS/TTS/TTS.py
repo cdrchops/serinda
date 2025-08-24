@@ -9,7 +9,6 @@
 # engine.say("hello wink")
 # engine.runAndWait()
 
-
 # pip install tk
 # pip install dragonfly2 pydirectinput webview keyboard
 # pip install clint
@@ -49,10 +48,23 @@ from bs4 import BeautifulSoup
 import win32com.client as wincl
 from urllib.request import urlopen
 
-# sapi5 - SAPI5 on Windows
-# nsss - NSSpeechSynthesizer on Mac OS X
-# espeak - eSpeak on every other platform
-engine = pyttsx3.init('sapi5')
+from serinda.util.PlatformDeterminator import PlatformDeterminator
+
+platformDeterminator = PlatformDeterminator()
+PLATFORM = platformDeterminator.PLATFORM
+pyttsxVariable = ""
+
+if platformDeterminator.isLinux():
+    # espeak - eSpeak on every other platform
+    pyttsxVariable = 'espeak'
+elif platformDeterminator.isMac():
+    # nsss - NSSpeechSynthesizer on Mac OS X
+    pyttsxVariable = 'nsss'
+elif platformDeterminator.isWindows():
+    # sapi5 - SAPI5 on Windows
+    pyttsxVariable = 'sapi5'
+
+engine = pyttsx3.init(pyttsxVariable)
 voices = engine.getProperty('voices')
 engine.setProperty('voice', voices[1].id)
 
@@ -65,7 +77,7 @@ def wishMe(assname):
     if hour >= 0 and hour < 12:
         speak("Good Morning Sir !")
 
-    elif hour >= 12 and hour < 18:
+    elif hour >= 12 and hour <= 18:
         speak("Good Afternoon Sir !")
 
     else:
@@ -120,7 +132,6 @@ def sendEmail(to, content):
     server.login('your email id', 'your email password')
     server.sendmail('your email id', to, content)
     server.close()
-
 
 if __name__ == '__main__':
     clear = lambda: os.system('cls')

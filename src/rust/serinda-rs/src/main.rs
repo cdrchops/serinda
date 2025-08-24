@@ -1,5 +1,6 @@
 use anyhow::{Context, Result};
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
+use cpal::SampleFormat;
 use hound;
 use reqwest::blocking::Client;
 use serde::Deserialize;
@@ -7,6 +8,7 @@ use simple_transcribe_rs::{model_handler, transcriber};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tts::Tts;
+use std::collections::HashMap;
 
 #[derive(Deserialize)]
 struct TextResponse {
@@ -22,18 +24,73 @@ fn transcribe_and_send() -> Result<()> {
 
     // Prepare a buffer to store audio data
     let audio_data: Arc<Mutex<Vec<i16>>> = Arc::new(Mutex::new(Vec::new()));
-    let audio_data_clone = audio_data.clone();
 
-    // Build input stream
-    let stream = device.build_input_stream(
-        &config.into(),
-        move |data: &[i16], _: &cpal::InputCallbackInfo| {
-            let mut buffer = audio_data_clone.lock().unwrap();
-            buffer.extend_from_slice(data);
-        },
-        |err| eprintln!("Error in stream: {}", err),
-        None,
-    )?;
+    // Capture params before moving config
+    let channels = config.channels();
+    let sample_rate = config.sample_rate().0;
+    let sample_format = config.sample_format();
+    let stream_config: cpal::StreamConfig = config.clone().into();
+
+    // Build input stream depending on sample format
+    let audio_data_clone = audio_data.clone();
+    let stream = match sample_format {
+        SampleFormat::F32 => {
+            device.build_input_stream(
+                &stream_config,
+                move |data: &[f32], _: &cpal::InputCallbackInfo| {
+                    let mut buffer = audio_data_clone.lock().unwrap();
+                    // Convert f32 [-1.0, 1.0] to i16
+                    buffer.extend(data.iter().map(|&s| {
+                        let v = (s * i16::MAX as f32).round();
+                        v.clamp(i16::MIN as f32, i16::MAX as f32) as i16
+                    }));
+                },
+                |err| eprintln!("Error in stream: {}", err),
+                None,
+            )?
+        }
+        SampleFormat::I16 => {
+            let audio_data_clone = audio_data.clone();
+            device.build_input_stream(
+                &stream_config,
+                move |data: &[i16], _: &cpal::InputCallbackInfo| {
+                    let mut buffer = audio_data_clone.lock().unwrap();
+                    buffer.extend_from_slice(data);
+                },
+                |err| eprintln!("Error in stream: {}", err),
+                None,
+            )?
+        }
+        SampleFormat::U16 => {
+            device.build_input_stream(
+                &stream_config,
+                move |data: &[u16], _: &cpal::InputCallbackInfo| {
+                    let mut buffer = audio_data_clone.lock().unwrap();
+                    // Convert unsigned to signed centered around 0
+                    buffer.extend(data.iter().map(|&s| {
+                        (s as i32 - i16::MAX as i32 - 1).clamp(i16::MIN as i32, i16::MAX as i32) as i16
+                    }));
+                },
+                |err| eprintln!("Error in stream: {}", err),
+                None,
+            )?
+        }
+        _ => {
+            // Fallback: attempt f32 path
+            device.build_input_stream(
+                &stream_config,
+                move |data: &[f32], _: &cpal::InputCallbackInfo| {
+                    let mut buffer = audio_data_clone.lock().unwrap();
+                    buffer.extend(data.iter().map(|&s| {
+                        let v = (s * i16::MAX as f32).round();
+                        v.clamp(i16::MIN as f32, i16::MAX as f32) as i16
+                    }));
+                },
+                |err| eprintln!("Error in stream: {}", err),
+                None,
+            )?
+        }
+    };
 
     // Start recording
     stream.play()?;
@@ -48,31 +105,33 @@ fn transcribe_and_send() -> Result<()> {
 
     // Write to WAV file
     let spec = hound::WavSpec {
-        channels: config.channels(),
-        sample_rate: config.sample_rate().0,
+        channels,
+        sample_rate,
         bits_per_sample: 16,
         sample_format: hound::SampleFormat::Int,
     };
+
     let mut writer = hound::WavWriter::create("temp_recording.wav", spec)?;
     for sample in samples {
         writer.write_sample(sample)?;
     }
+
     writer.finalize()?;
 
     // Transcribe using simple_transcribe_rs
-    let model = tokio::runtime::Runtime::new()
-        .unwrap()
-        .block_on(model_handler::ModelHandler::new("tiny", "models/"));
+    let rt = tokio::runtime::Runtime::new().context("Failed to create Tokio runtime")?;
+    let model = rt.block_on(model_handler::ModelHandler::new("tiny", "models/"));
     let trans = transcriber::Transcriber::new(model);
-    let result = trans.transcribe("temp_recording.wav", None)?;
-    let text = result.get_text();
-    // let result = trans.transcribe("temp_recording.wav", None).context("Transcription failed")?;
+    let result = trans
+        .transcribe("temp_recording.wav", None)
+        .map_err(|e| anyhow::Error::msg(format!("Transcription failed: {}", e)))?;
+    let text: String = result.get_text().to_string();
     println!("Transcribed text: {}", text);
 
     // Send to Flask server
     let client = Client::new();
-    let mut map = std::collections::HashMap::new();
-    map.insert("text", text.as_str());
+    let mut map: HashMap<&str, String> = HashMap::new();
+    map.insert("text", text.clone());
     let res = client
         .post("http://localhost:5000/transcription")
         .json(&map)

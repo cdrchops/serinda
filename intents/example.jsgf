@@ -28,6 +28,14 @@ public <detectBarcode> = detect barcode (on | for) camera <cameras>{value};
 // Rule for detectMotion intent
 public <detectMotion> = detect motion (on | for) camera <cameras>{value};
 
+public <translateToEnglish> = translate to English;
+public <translateToSpanish> = translate to Spanish;
+
+// Placeholder rules for number ranges (to be expanded or handled externally)
+//<xRange> = (zero | one | two | ... | one hundred fifty);
+//<yRange> = (zero | one | two | ... | one hundred fifty);
+//<sizeOfArea> = (one | two | three | ... | fifty);
+
 // Reusable rule for cameras
 <cameras> = (
     one{1} | two{2} | three{3} | four{4} | five{5} |
@@ -35,8 +43,3 @@ public <detectMotion> = detect motion (on | for) camera <cameras>{value};
     1{1} | 2{2} | 3{3} | 4{4} | 5{5} |
     6{6} | 7{7} | 8{8} | 9{9}
 );
-
-// Placeholder rules for number ranges (to be expanded or handled externally)
-// <xRange> = (zero | one | two | ... | one hundred fifty);
-// <yRange> = (zero | one | two | ... | one hundred fifty);
-// <sizeOfArea> = (one | two | three | ... | fifty);
