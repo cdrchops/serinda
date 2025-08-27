@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server-side Gesture Control</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        #renderCanvas { width: 640px; height: 480px; }
+    </style>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+</head>
+<body style="background-color:black">
+    {% include 'menu.html' %}
+    <br/><br/>
+    <div style="display:flex; gap:24px; align-items:flex-start;">
+        <canvas id="renderCanvas"></canvas>
+        <div style="color:#ddd; font-family:monospace;">
+            <div>Gesture: <span id="gestureSpan">none</span></div>
+            <div>Grabbing: <span id="grabbingSpan">false</span></div>
+            <div>Status: <span id="statusSpan">connecting...</span></div>
+        </div>
+    </div>
+
+    <script>
+        // BabylonJS setup
+        const canvas = document.getElementById('renderCanvas');
+        const engine = new BABYLON.Engine(canvas, true);
+        const scene = new BABYLON.Scene(engine);
+        scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
+        const camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 0, -10), scene);
+        camera.setTarget(BABYLON.Vector3.Zero());
+        const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
+
+        // Object manager
+        const objects = new Map(); // id -> { mesh, material, grabOffset, lastAngle }
+        let activeObjectId = null;
+        function getOrCreateObject(id) {
+            if (objects.has(id)) return objects.get(id);
+            const mesh = BABYLON.MeshBuilder.CreateBox(id, { size: 1 }, scene);
+            const material = new BABYLON.StandardMaterial(`mat_${id}`, scene);
+            material.diffuseColor = new BABYLON.Color3(1, 1, 1);
+            mesh.material = material;
+            mesh.billboardMode = BABYLON.Mesh.BILLBOARDMODE_NONE;
+            mesh.isVisible = true;
+            const entry = { mesh, material, grabOffset: new BABYLON.Vector3(0, 0, 0), lastAngle: null };
+            objects.set(id, entry);
+            return entry;
+        }
+        // Create one default object to manipulate
+        getOrCreateObject('server_obj_0').mesh.position.set(0, 0, 0);
+
+        // Gesture state (driven by server)
+        let currentGesture = 'none';
+        let isGrabbing = false;
+        let wasGrabbing = false;
+
+        // Video/frame calibration for mapping
+        let videoWidth = 640;
+        let videoHeight = 480;
+        const sceneWidth = 6;
+        const sceneHeight = 4.5;
+        function mapToScene(x, y) {
+            const sceneX = (x / videoWidth) * sceneWidth - sceneWidth / 2;
+            const sceneY = -((y / videoHeight) * sceneHeight - sceneHeight / 2);
+            return [sceneX, sceneY];
+        }
+        function getNearestObject(cursorVec3, maxDist = 1.0) {
+            let nearestId = null;
+            let nearestDist = Infinity;
+            objects.forEach(({ mesh }, id) => {
+                if (!mesh.isVisible) return;
+                const dx = mesh.position.x - cursorVec3.x;
+                const dy = mesh.position.y - cursorVec3.y;
+                const d = Math.hypot(dx, dy);
+                if (d < nearestDist && d <= maxDist) {
+                    nearestDist = d;
+                    nearestId = id;
+                }
+            });
+            return nearestId;
+        }
+
+        // Render loop showing active object's color by gesture
+        engine.runRenderLoop(() => {
+            objects.forEach(({ material }) => { material.diffuseColor = new BABYLON.Color3(1,1,1); });
+            if (activeObjectId && objects.has(activeObjectId)) {
+                const { material } = objects.get(activeObjectId);
+                switch (currentGesture) {
+                    case 'fist': material.diffuseColor = new BABYLON.Color3(1,0,0); break;
+                    case 'open': material.diffuseColor = new BABYLON.Color3(0,1,0); break;
+                    case 'two_fingers': material.diffuseColor = new BABYLON.Color3(0,0,1); break;
+                    default: material.diffuseColor = new BABYLON.Color3(1,1,1);
+                }
+            }
+            scene.render();
+        });
+
+        // SSE connection to backend
+        const statusSpan = document.getElementById('statusSpan');
+        const gestureSpan = document.getElementById('gestureSpan');
+        const grabbingSpan = document.getElementById('grabbingSpan');
+
+        let source;
+        function connect() {
+            source = new EventSource('/api/gestures');
+            source.onopen = () => { statusSpan.textContent = 'connected'; };
+            source.onerror = () => { statusSpan.textContent = 'disconnected - retrying...'; };
+            source.onmessage = (e) => {
+                try {
+                    const data = JSON.parse(e.data);
+                    if (data && data.frame_size) {
+                        videoWidth = data.frame_size.w || videoWidth;
+                        videoHeight = data.frame_size.h || videoHeight;
+                    }
+                    if (data && data.error) {
+                        statusSpan.textContent = `${data.error}: ${data.message || ''}`;
+                        return;
+                    }
+                    currentGesture = data.gesture || 'none';
+                    wasGrabbing = isGrabbing;
+                    isGrabbing = !!data.is_grabbing;
+                    gestureSpan.textContent = currentGesture;
+                    grabbingSpan.textContent = String(isGrabbing);
+
+                    if (!data.index_tip || !data.index_mcp) return;
+                    const idx = data.index_tip; // {x,y} in pixels
+                    const mcp = data.index_mcp;
+                    const [cursorX, cursorY] = mapToScene(idx.x, idx.y);
+                    const cursor = new BABYLON.Vector3(cursorX, cursorY, 0);
+
+                    if (isGrabbing && !wasGrabbing) {
+                        const candidateId = getNearestObject(cursor, 1.5) || 'server_obj_0';
+                        activeObjectId = candidateId;
+                        const entry = objects.get(activeObjectId) || getOrCreateObject(activeObjectId);
+                        entry.grabOffset = entry.mesh.position.subtract(cursor);
+                        const vX = (idx.x - mcp.x);
+                        const vY = (idx.y - mcp.y);
+                        entry.lastAngle = Math.atan2(vY, vX);
+                        entry.mesh.isVisible = true;
+                    }
+
+                    if (isGrabbing && activeObjectId && objects.has(activeObjectId)) {
+                        const entry = objects.get(activeObjectId);
+                        entry.mesh.position = cursor.add(entry.grabOffset);
+                        const vX = (idx.x - mcp.x);
+                        const vY = (idx.y - mcp.y);
+                        const angle = Math.atan2(vY, vX);
+                        if (entry.lastAngle !== null) {
+                            const delta = angle - entry.lastAngle;
+                            entry.mesh.rotation.z += delta;
+                        }
+                        entry.lastAngle = angle;
+                    } else {
+                        if (wasGrabbing && activeObjectId && objects.has(activeObjectId)) {
+                            const entry = objects.get(activeObjectId);
+                            entry.lastAngle = null;
+                        }
+                        if (!isGrabbing) {
+                            activeObjectId = null;
+                        }
+                    }
+                } catch (err) {
+                    statusSpan.textContent = 'parse_error';
+                }
+            };
+        }
+        connect();
+        window.addEventListener('beforeunload', () => { if (source) source.close(); });
+    </script>
+</body>
+</html>

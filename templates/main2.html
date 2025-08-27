@@ -33,10 +33,20 @@
         }
     </style>
 
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-{#    <script src="/static/js/camera_utils.js"></script>#}
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
-{#    <script src="/static/js/hands.js"></script>#}
+    <script>
+        (function(){
+            // Ensure fresh load of local MediaPipe libs each page visit
+            const ts = Date.now();
+            function addScript(src){
+                var s=document.createElement('script');
+                s.src=src + (src.indexOf('?')===-1?('?v='+ts):('&v='+ts));
+                s.defer=false; // load immediately in order
+                document.write(s.outerHTML);
+            }
+            addScript('/static/js/camera_utils.js');
+            addScript('/static/js/hands.js');
+        })();
+    </script>
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
 {#    <script src="/static/js/babylon.js"></script>#}
     <script src="https://docs.opencv.org/4.5.5/opencv.js"></script>
@@ -195,26 +205,6 @@
             return entry;
         }
 
-        // Hand wireframe connections (MediaPipe landmarks)
-        const connections = [
-            [0,1], [1,2], [2,3], [3,4],      // Thumb
-            [0,5], [5,6], [6,7], [7,8],      // Index
-            [0,9], [9,10], [10,11], [11,12], // Middle
-            [0,13], [13,14], [14,15], [15,16], // Ring
-            [0,17], [17,18], [18,19], [19,20]  // Pinky
-        ];
-
-        // Hand lines
-        const handLines = connections.map((_, i) => {
-            const line = BABYLON.MeshBuilder.CreateLines(`handLine${i}`, {
-                points: [new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, 0)],
-                updatable: true,
-                color: new BABYLON.Color3(1, 0, 0)
-            }, scene);
-            line.isVisible = false;
-            return line;
-        });
-
         // Gesture state
         let currentGesture = 'none';
         let isGrabbing = false;
@@ -286,149 +276,7 @@
             return nearestId;
         }
 
-        // Gesture detection using all finger landmarks
-        function detectGesture(landmarks) {
-            const wrist = landmarks[0];
-            const fingers = [
-                { base: 2, tip: 4 }, // Thumb (use IP joint as base)
-                { base: 5, tip: 8 }, // Index
-                { base: 9, tip: 12 }, // Middle
-                { base: 13, tip: 16 }, // Ring
-                { base: 17, tip: 20 } // Pinky
-            ];
-
-            // Determine finger state (extended or curled)
-            const states = fingers.map(f => {
-                const base = landmarks[f.base];
-                const tip = landmarks[f.tip];
-                const dist_base_wrist = distance(wrist, base);
-                const dist_tip_wrist = distance(wrist, tip);
-                return dist_tip_wrist > dist_base_wrist * 1.2 ? 'extended' : 'curled';
-            });
-
-            // Count extended fingers
-            const extendedCount = states.filter(s => s === 'extended').length;
-
-            // Define gestures
-            if (extendedCount === 0) {
-                return 'fist'; // All fingers curled
-            } else if (extendedCount >= 4) {
-                return 'open'; // Most or all fingers extended
-            } else if (states[1] === 'extended' && states[2] === 'extended' && states[0] === 'curled' && states[3] === 'curled' && states[4] === 'curled') {
-                return 'two_fingers'; // Index and middle extended, others curled
-            } else {
-                return 'none';
-            }
-        }
-
-        // MediaPipe Hands setup
-        const hands = new Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
-        hands.setOptions({
-            maxNumHands: 1,
-            modelComplexity: 1,
-            minDetectionConfidence: 0.5,
-            minTrackingConfidence: 0.5
-        });
-        hands.onResults(onResults);
-
-        const cameraFeed = new Camera(video, {
-            onFrame: async () => await hands.send({ image: video }),
-            width: 640,
-            height: 480
-        });
-        cameraFeed.start();
-
-        // Hand tracking results + gesture interactions (pinch to grab, move, rotate)
-        function onResults(results) {
-            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-                const landmarks = results.multiHandLandmarks[0];
-                currentGesture = detectGesture(landmarks);
-
-                // Update hand lines
-                connections.forEach((conn, i) => {
-                    const p1 = landmarks[conn[0]];
-                    const p2 = landmarks[conn[1]];
-                    const [x1, y1] = mapToScene(p1.x * videoWidth, p1.y * videoHeight);
-                    const [x2, y2] = mapToScene(p2.x * videoWidth, p2.y * videoHeight);
-                    const points = [
-                        new BABYLON.Vector3(x1, y1, 0),
-                        new BABYLON.Vector3(x2, y2, 0)
-                    ];
-                    BABYLON.MeshBuilder.CreateLines(`handLine${i}`, {
-                        points,
-                        updatable: true,
-                        instance: handLines[i]
-                    }, scene);
-                    handLines[i].isVisible = true;
-                });
-
-                // Compute "pinch" between thumb tip (4) and index tip (8)
-                const thumbTip = landmarks[4];
-                const indexTip = landmarks[8];
-                const pinchDistanceNorm = distance(thumbTip, indexTip); // normalized space (0..1)
-                // Dynamic threshold scaled to video pixels for stability
-                const pinchPx = distanceXY(thumbTip.x * videoWidth, thumbTip.y * videoHeight, indexTip.x * videoWidth, indexTip.y * videoHeight);
-                const pinchThresholdPx = 35; // tune between 25-45 if needed
-
-                wasGrabbing = isGrabbing;
-                isGrabbing = pinchPx < pinchThresholdPx;
-
-                // Map index tip to scene coordinates for cursor/dragging
-                const [cursorX, cursorY] = mapToScene(indexTip.x * videoWidth, indexTip.y * videoHeight);
-                const cursor = new BABYLON.Vector3(cursorX, cursorY, 0);
-
-                if (isGrabbing && !wasGrabbing) {
-                    // On grab start: choose nearest visible object to the cursor
-                    const candidateId = getNearestObject(cursor, 1.5);
-                    if (candidateId) {
-                        activeObjectId = candidateId;
-                        const entry = objects.get(activeObjectId);
-                        // Compute offset from cursor to object to avoid snapping
-                        entry.grabOffset = entry.mesh.position.subtract(cursor);
-                        // Initialize rotation tracking based on index finger direction (5 -> 8)
-                        const indexMCP = landmarks[5];
-                        const vX = (indexTip.x - indexMCP.x);
-                        const vY = (indexTip.y - indexMCP.y);
-                        entry.lastAngle = Math.atan2(vY, vX);
-                        // Ensure the object is visible when grabbing
-                        entry.mesh.isVisible = true;
-                    } else {
-                        activeObjectId = null;
-                    }
-                }
-
-                if (isGrabbing && activeObjectId && objects.has(activeObjectId)) {
-                    const entry = objects.get(activeObjectId);
-                    // Move: follow cursor with offset
-                    entry.mesh.position = cursor.add(entry.grabOffset);
-                    // Rotate: compute angle delta from index finger orientation
-                    const indexMCP = landmarks[5];
-                    const vX = (indexTip.x - indexMCP.x);
-                    const vY = (indexTip.y - indexMCP.y);
-                    const angle = Math.atan2(vY, vX);
-                    if (entry.lastAngle !== null) {
-                        const delta = angle - entry.lastAngle;
-                        entry.mesh.rotation.z += delta; // rotate around z axis
-                    }
-                    entry.lastAngle = angle;
-                } else {
-                    // On release: reset rotation tracker
-                    if (wasGrabbing && activeObjectId && objects.has(activeObjectId)) {
-                        const entry = objects.get(activeObjectId);
-                        entry.lastAngle = null;
-                    }
-                    if (!isGrabbing) {
-                        activeObjectId = null;
-                    }
-                }
-            } else {
-                currentGesture = 'none';
-                handLines.forEach(line => line.isVisible = false);
-                wasGrabbing = isGrabbing;
-                isGrabbing = false;
-                activeObjectId = null;
-            }
-        }
+        // Hand gestures moved to external module
 
         // OpenCV.js face detection
         let classifier;
@@ -495,6 +343,16 @@
             src.delete();
             faces.delete();
             requestAnimationFrame(detectFaces);
+        }
+    </script>
+
+    <script src="/static/js/hand_gestures.js"></script>
+    <script>
+        // Initialize hand/gesture module after globals are defined
+        if (typeof initHands === 'function') {
+            initHands();
+        } else {
+            console.error('initHands() is not available.');
         }
     </script>
 
