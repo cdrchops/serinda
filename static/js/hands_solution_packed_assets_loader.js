@@ -25,8 +25,21 @@
         Module['locateFile'] = Module['locateFilePackage'];
         err('warning: you defined Module.locateFilePackage, that has been renamed to Module.locateFile (using your locateFilePackage for now)');
       }
-      var REMOTE_PACKAGE_NAME = Module['locateFile'] ? Module['locateFile'](REMOTE_PACKAGE_BASE, '') : REMOTE_PACKAGE_BASE;
-var REMOTE_PACKAGE_SIZE = metadata['remote_package_size'];
+      // Force loading from the local /static/ path where the .data file is served
+      var REMOTE_PACKAGE_NAME = (function() {
+        try {
+          if (typeof window === 'object') {
+            // Absolute path ensures correct resolution regardless of current page path
+            return '/static/hands_solution_packed_assets.data';
+          } else if (typeof location !== 'undefined') {
+            // Web worker: use absolute as well
+            return '/static/hands_solution_packed_assets.data';
+          }
+        } catch (e) {}
+        // Fallbacks: respect Module.locateFile if provided, else default base name
+        return Module['locateFile'] ? Module['locateFile'](REMOTE_PACKAGE_BASE, '') : REMOTE_PACKAGE_BASE;
+      })();
+      var REMOTE_PACKAGE_SIZE = metadata['remote_package_size'];
 
       function fetchRemotePackage(packageName, packageSize, callback, errback) {
         if (typeof process === 'object' && typeof process.versions === 'object' && typeof process.versions.node === 'string') {
