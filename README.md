@@ -1,3 +1,31 @@
+<h1>TODO:</h1>
+
+- [ ] Connect USB Camera 1 \
+https://support.myownconference.com/en/article/setting-up-and-using-an-external-usb-camera-z5o80x/
+- [ ] Connect USB Camera 2 \
+
+- [ ] Use WebRTC to pull up Camera 1
+
+- [ ] Set up camera on headset
+
+- [ ] Connect camera and headset to laptop via longer port
+
+- [ ] Test hand gestures with new camera set up
+
+- [ ] Maybe find a new gesture library as the one I'm using with WebRTC isn't working as well.
+
+- [ ] A gesture library hosted locally
+
+<h4>Research Links</h4>
+https://webrtc.org/ \
+https://github.com/AlexxIT/WebRTC \
+https://www.reddit.com/r/raspberry_pi/comments/1ffkyj3/i_built_a_lowlatency_webrtc_live_camera_on_a_pi/ \
+https://www.google.com/search?q=deepseek+offline&rlz=1C1UEAD_enUS1165US1166&oq=deepseek+offline&gs_lcrp=EgZjaHJvbWUqBwgAEAAYgAQyBwgAEAAYgAQyBwgBEAAYgAQyBwgCEAAYgAQyBwgDEAAYgAQyBwgEEAAYgAQyBwgFEAAYgAQyBwgGEAAYgAQyBwgHEAAYgAQyBwgIEAAYgAQyBwgJEAAYgATSAQg0NTQ4ajBqN6gCALACAA&sourceid=chrome&ie=UTF-8 \
+https://stackoverflow.com/questions/24514936/how-can-i-serve-npm-packages-using-flask \
+https://pypi.org/project/Flask-Fanstatic/ \
+https://www.fanstatic.org/en/latest/intro.html \
+
+
 <h2>What is SERINDA?</h2>
 Sophisticated Engaging Rider Interface Near-eye Digital Assistant or SERINDA.<br/><br/>
 It's a Mixed Reality Intelligent Personal Assistant using Python3, Flask, HTML/CSS/JS, and OpenCV.  It was originally supposed to be for HMD on a motorcycle.  It is now, more of an HMD for daily life.
