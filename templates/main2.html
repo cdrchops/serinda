@@ -32,11 +32,23 @@
             left: 0;
         }
     </style>
+{#    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>#}
+{#    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>#}
 
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-{#    <script src="/static/js/camera_utils.js"></script>#}
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
-{#    <script src="/static/js/hands.js"></script>#}
+    <script>
+        (function(){
+            // Ensure fresh load of local MediaPipe libs each page visit
+            const ts = Date.now();
+            function addScript(src){
+                var s=document.createElement('script');
+                s.src=src + (src.indexOf('?')===-1?('?v='+ts):('&v='+ts));
+                s.defer=false; // load immediately in order
+                document.write(s.outerHTML);
+            }
+            addScript('/static/js/camera_utils.js');
+            addScript('/static/js/hands.js');
+        })();
+    </script>
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
 {#    <script src="/static/js/babylon.js"></script>#}
     <script src="https://docs.opencv.org/4.5.5/opencv.js"></script>
