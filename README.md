@@ -24,7 +24,8 @@ https://www.google.com/search?q=deepseek+offline&rlz=1C1UEAD_enUS1165US1166&oq=d
 https://stackoverflow.com/questions/24514936/how-can-i-serve-npm-packages-using-flask \
 https://pypi.org/project/Flask-Fanstatic/ \
 https://www.fanstatic.org/en/latest/intro.html \
-
+https://www.google.com/search?q=deepseek+offline&rlz=1C1UEAD_enUS1165US1166&oq=deepseek+offline&gs_lcrp=EgZjaHJvbWUqBwgAEAAYgAQyBwgAEAAYgAQyBwgBEAAYgAQyBwgCEAAYgAQyBwgDEAAYgAQyBwgEEAAYgAQyBwgFEAAYgAQyBwgGEAAYgAQyBwgHEAAYgAQyBwgIEAAYgAQyBwgJEAAYgATSAQg0NTQ4ajBqN6gCALACAA&sourceid=chrome&ie=UTF-8 \
+https://cdn.jsdelivr.net/npm/@mediapipe/hands/
 
 <h2>What is SERINDA?</h2>
 Sophisticated Engaging Rider Interface Near-eye Digital Assistant or SERINDA.<br/><br/>
