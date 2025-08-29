@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+        <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
+</head>
+<body>
+
+    <h1 id="hellomarkdown">hello here</h1>
+
+    <script>
+        var converter = new showdown.Converter();
+        var text      = '- [x] Connect USB Camera 1 <br/>- [x] Connect USB Camera 2 <br/>';
+        var html      = converter.makeHtml(text);
+        document.getElementById("hellomarkdown").innerHTML = html;//markdown(text);
+    </script>
+</body>
+</html>

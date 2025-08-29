@@ -3,21 +3,20 @@
 
 <h2>TODO:</h2>
 
-- [ ] Connect USB Camera 1 \
+- [x] Connect USB Camera 1 \
 https://support.myownconference.com/en/article/setting-up-and-using-an-external-usb-camera-z5o80x/
-- [ ] Connect USB Camera 2 \
-
-- [ ] Use WebRTC to pull up Camera 1
-
-- [ ] Set up camera on headset
-
-- [ ] Connect camera and headset to laptop via longer port
-
-- [ ] Test hand gestures with new camera set up
-
-- [ ] Maybe find a new gesture library as the one I'm using with WebRTC isn't working as well.
-
-- [ ] A gesture library hosted locally
+- [x] Connect USB Camera 2 \
+- [x] Use WebRTC to pull up Camera 1 \
+- [ ] Use WebRTC to pull up one camera and display in both eyes \
+- [ ] setup display for two eyes with the headset \
+- [ ] Use WebRTC to switch between cameras \
+- [ ] Use WebRTC to select audio input \
+- [ ] Use WebRTC to select audio output - switch between headphones and external, or use both \
+- [ ] Set up camera on headset \
+- [ ] Connect camera and headset to laptop via longer port \
+- [ ] Test hand gestures with new camera set up \
+- [ ] Maybe find a new gesture library as the one I'm using with WebRTC isn't working as well. \
+- [x] A gesture library hosted locally
 
 <h4>Research Links</h4>
 https://webrtc.org/ \

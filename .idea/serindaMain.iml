@@ -44,6 +44,7 @@
     <orderEntry type="library" name="babylonjs" level="application" />
     <orderEntry type="library" name="opencv" level="application" />
     <orderEntry type="module" module-name="samples" />
+    <orderEntry type="module" module-name="WebRTCsamples" />
   </component>
   <component name="TemplatesService">
     <option name="TEMPLATE_CONFIGURATION" value="Jinja2" />

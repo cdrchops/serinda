@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF File Manager</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.82/pdf.min.mjs" type="module"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.17"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            display: flex;
+        }
+        #directory {
+            width: 30%;
+            border-right: 1px solid #ccc;
+            padding-right: 20px;
+            overflow-y: auto;
+        }
+        #content {
+            width: 70%;
+            padding-left: 20px;
+        }
+        .folder, .file {
+            cursor: pointer;
+            margin: 5px 0;
+        }
+        .folder {
+            font-weight: bold;
+        }
+        .file:hover, .folder:hover {
+            color: blue;
+        }
+        .children {
+            margin-left: 20px;
+        }
+        #pdf-container {
+            overflow-y: auto;
+            height: 80vh;
+            border: 1px solid #ccc;
+        }
+        #controls {
+            margin-bottom: 10px;
+        }
+        #video {
+            display: none;
+        }
+        #output_canvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="directory">
+        <h2>Directory</h2>
+        <div id="directory-content"></div>
+    </div>
+    <div id="content">
+        <h2>PDF Content</h2>
+        <div id="controls">
+            <button id="voice-toggle">Toggle Voice Control</button>
+            <button id="gesture-toggle">Toggle Gesture Control</button>
+        </div>
+        <div id="pdf-container"></div>
+        <video id="video" width="640" height="480" autoplay playsinline></video>
+        <canvas id="output_canvas" width="640" height="480"></canvas>
+    </div>
+
+    <script type="module">
+        // PDF.js setup
+        import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.82/pdf.min.mjs';
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.82/pdf.worker.min.mjs';
+
+        // MediaPipe setup
+        const { GestureRecognizer, FilesetResolver } = window;
+
+        let gestureRecognizer;
+        let videoElement = document.getElementById('video');
+        let canvasElement = document.getElementById('output_canvas');
+        let canvasCtx = canvasElement.getContext('2d');
+        let lastGesture = '';
+        let gestureEnabled = false;
+
+        async function createGestureRecognizer() {
+            const vision = await FilesetResolver.forVisionTasks(
+                'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.17/wasm'
+            );
+            gestureRecognizer = await GestureRecognizer.createFromOptions(vision, {
+                baseOptions: {
+                    modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task',
+                    delegate: 'GPU'
+                },
+                runningMode: 'VIDEO',
+                numHands: 2
+            });
+        }
+
+        createGestureRecognizer();
+
+        async function enableCam() {
+            const constraints = { 'video': { facingMode: 'user' } };
+            navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+                videoElement.srcObject = stream;
+                videoElement.addEventListener('loadeddata', predictWebcam);
+            });
+        }
+
+        let lastVideoTime = -1;
+        async function predictWebcam() {
+            if (!gestureEnabled) return;
+
+            let nowInMs = Date.now();
+            if (videoElement.currentTime !== lastVideoTime) {
+                lastVideoTime = videoElement.currentTime;
+                const results = await gestureRecognizer.recognizeForVideo(videoElement, nowInMs);
+                canvasCtx.save();
+                canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+                if (results.landmarks) {
+                    // Draw landmarks (optional)
+                    // For simplicity, omitted drawing code
+                }
+                if (results.gestures.length > 0) {
+                    const gesture = results.gestures[0][0].categoryName;
+                    if (gesture !== lastGesture) {
+                        lastGesture = gesture;
+                        handleGesture(gesture);
+                    }
+                } else {
+                    lastGesture = '';
+                }
+                canvasCtx.restore();
+            }
+            window.requestAnimationFrame(predictWebcam);
+        }
+
+        function handleGesture(gesture) {
+            const pdfContainer = document.getElementById('pdf-container');
+            if (gesture === 'thumb_up') {
+                pdfContainer.scrollBy(0, -200);  // Scroll up
+            } else if (gesture === 'thumb_down') {
+                pdfContainer.scrollBy(0, 200);  // Scroll down
+            }
+            // Add more gestures as needed, e.g., 'victory' for top, etc.
+        }
+
+        document.getElementById('gesture-toggle').onclick = () => {
+            gestureEnabled = !gestureEnabled;
+            if (gestureEnabled) {
+                enableCam();
+                // videoElement.style.display = 'block'; // Optional: show video
+            } else {
+                // Stop stream if needed
+                if (videoElement.srcObject) {
+                    videoElement.srcObject.getTracks().forEach(track => track.stop());
+                }
+                // videoElement.style.display = 'none';
+            }
+        };
+
+        // Voice control setup
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+
+        let voiceEnabled = false;
+
+        recognition.onresult = (event) => {
+            const command = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
+            handleVoiceCommand(command);
+        };
+
+        function handleVoiceCommand(command) {
+            const pdfContainer = document.getElementById('pdf-container');
+            if (command.includes('scroll down')) {
+                pdfContainer.scrollBy(0, 200);
+            } else if (command.includes('scroll up')) {
+                pdfContainer.scrollBy(0, -200);
+            } else if (command.includes('go to top')) {
+                pdfContainer.scrollTop = 0;
+            } else if (command.includes('go to bottom')) {
+                pdfContainer.scrollTop = pdfContainer.scrollHeight;
+            }
+            // Add more commands as needed
+        }
+
+        document.getElementById('voice-toggle').onclick = () => {
+            voiceEnabled = !voiceEnabled;
+            if (voiceEnabled) {
+                recognition.start();
+            } else {
+                recognition.stop();
+            }
+        };
+
+        // Directory structure
+        const structure = {{ structure | tojson | safe }};
+
+        function renderDirectory(structure, container) {
+            const ul = document.createElement('ul');
+            for (const [name, item] of Object.entries(structure)) {
+                const li = document.createElement('li');
+                li.className = item.type;
+                li.textContent = name;
+                if (item.type === 'file') {
+                    li.onclick = () => loadPDF(item.path);
+                }
+                ul.appendChild(li);
+                if (item.type === 'folder' && Object.keys(item.children).length > 0) {
+                    const childrenContainer = document.createElement('div');
+                    childrenContainer.className = 'children';
+                    renderDirectory(item.children, childrenContainer);
+                    li.appendChild(childrenContainer);
+                }
+            }
+            container.appendChild(ul);
+        }
+
+        async function loadPDF(relPath) {
+            const pdfContainer = document.getElementById('pdf-container');
+            pdfContainer.innerHTML = '';
+            const loadingTask = pdfjsLib.getDocument('/pdf/' + encodeURIComponent(relPath));
+            const pdf = await loadingTask.promise;
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const page = await pdf.getPage(pageNum);
+                const viewport = page.getViewport({ scale: 1.5 });
+                const canvas = document.createElement('canvas');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                const renderContext = {
+                    canvasContext: canvas.getContext('2d'),
+                    viewport: viewport
+                };
+                await page.render(renderContext).promise;
+                pdfContainer.appendChild(canvas);
+            }
+        }
+
+        // Initialize directory
+        const directoryContent = document.getElementById('directory-content');
+        renderDirectory(structure, directoryContent);
+    </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+#JSGF V1.0;
+
+grammar sentences;
+
+// Rule for showCommands intent
+public <showCommands> = (show commands | display commands);

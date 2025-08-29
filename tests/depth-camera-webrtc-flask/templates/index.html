@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebRTC Depth Cameras</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.1/socket.io.min.js"></script>
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+</head>
+<body>
+    <video id="video1" autoplay playsinline style="width: 320px; height: 240px;"></video>
+    <video id="video2" autoplay playsinline style="width: 320px; height: 240px;"></video>
+    <video id="remoteVideo" autoplay playsinline style="width: 640px; height: 480px;"></video> <!-- Depth map stream -->
+    <script>
+        const socket = io();
+        async function startCameras() {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+            if (videoDevices.length < 2) {
+                console.error('Two cameras required');
+                return;
+            }
+            const stream1 = await navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: videoDevices[0].deviceId } } });
+            const stream2 = await navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: videoDevices[1].deviceId } } });
+            document.getElementById('video1').srcObject = stream1;
+            document.getElementById('video2').srcObject = stream2;
+
+            const pc = new RTCPeerConnection();
+            stream1.getTracks().forEach(track => pc.addTrack(track, stream1));
+            stream2.getTracks().forEach(track => pc.addTrack(track, stream2));
+
+            pc.ontrack = e => {
+                const remoteStream = new MediaStream([e.track]);
+                document.getElementById('remoteVideo').srcObject = remoteStream;
+            };
+
+            pc.onicecandidate = e => {
+                if (e.candidate) socket.emit('ice-candidate', e.candidate);
+            };
+
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+            socket.emit('offer', { sdp: offer.sdp, type: offer.type });
+
+            socket.on('answer', async answer => {
+                await pc.setRemoteDescription(answer);
+            });
+            socket.on('ice-candidate', candidate => {
+                pc.addIceCandidate(candidate);
+            });
+        }
+        startCameras();
+    </script>
+</body>
+</html>

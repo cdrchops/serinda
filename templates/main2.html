@@ -15,7 +15,7 @@
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
     {#{{ url_for('static', filename='hamburger2.css') }}#}
-   <link rel="stylesheet" href="/static/hamburger2.css">
+    <link rel="stylesheet" href="/static/hamburger2.css">
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="stylesheet" href="/static/style.css">
     <style>
@@ -28,7 +28,8 @@
         }
         #renderCanvas {
             position: absolute;
-            top: 100px;
+            {#top: 100px;#}
+            top: 0;
             left: 0;
         }
     </style>
@@ -49,10 +50,11 @@
             addScript('/static/js/hands.js');
         })();
     </script>
-    <script src="https://cdn.babylonjs.com/babylon.js"></script>
-{#    <script src="/static/js/babylon.js"></script>#}
-    <script src="https://docs.opencv.org/4.5.5/opencv.js"></script>
-{#    <script src="/static/js/opencv.js"></script>#}
+
+    {#    <script src="https://cdn.babylonjs.com/babylon.js"></script>#}
+    <script src="/static/js/babylon.js"></script>
+    {#    <script src="https://docs.opencv.org/4.5.5/opencv.js"></script>#}
+    <script src="/static/js/opencv.js"></script>
 </head>
 <body style="background-color:black">
     {% include 'menu.html' %}
@@ -73,39 +75,6 @@
             {%  include 'displaySection.html' %}
         </div>
     </div>
-
-{#    <h1><a href="//webrtc.github.io/samples/" title="WebRTC samples homepage">WebRTC samples</a><span>Select sources &amp; outputs</span>#}
-{#    </h1>#}
-{##}
-{#    <p>Get available audio, video sources and audio output devices from <code>mediaDevices.enumerateDevices()</code>#}
-{#        then set the source for <code>getUserMedia()</code> using a <code>deviceId</code> constraint.</p>#}
-{#    <p><b>Note:</b> without permission, the browser will restrict the available devices to at most one per type.</p>#}
-{##}
-{#    <div class="select">#}
-{#        <label for="audioSource">Audio input source: </label><select id="audioSource"></select>#}
-{#    </div>#}
-{##}
-{#    <div class="select">#}
-{#        <label for="audioOutput">Audio output destination: </label><select id="audioOutput"></select>#}
-{#    </div>#}
-{##}
-{#    <div class="select">#}
-{#        <label for="videoSource">Video source: </label><select id="videoSource"></select>#}
-{#    </div>#}
-{##}
-{#    <div class="select">#}
-{#        <label for="objectType">Object type: </label>#}
-{#        <select id="objectType">#}
-{#            <option value="face" selected>face</option>#}
-{#            <option value="bottle">bottle</option>#}
-{#            <option value="phone">phone</option>#}
-{#        </select>#}
-{#    </div>#}
-
-{#    <video id="video" playsinline autoplay></video>#}
-{##}
-{#    <p><b>Note:</b> If you hear a reverb sound your microphone is picking up the output of your#}
-{#        speakers/headset, lower the volume and/or move the microphone further away from your speakers/headset.</p>#}
 
     <h1 id="hellomarkdown">hello here</h1>
 
@@ -348,6 +317,7 @@
             width: 640,
             height: 480
         });
+
         cameraFeed.start();
 
         // Hand tracking results + gesture interactions (pinch to grab, move, rotate)
@@ -445,8 +415,9 @@
         // OpenCV.js face detection
         let classifier;
         cv['onRuntimeInitialized'] = async () => {
-            const response = await fetch('https://raw.githubusercontent.com/opencv/opencv/master/data/haarcascades/haarcascade_frontalface_default.xml');
-            {#const response = await fetch('/static/opencv/haarcascade_frontalface_default.xml');#}
+            // Load cascade from local static directory to enable offline usage
+            {#const response = await fetch('https://raw.githubusercontent.com/opencv/opencv/master/data/haarcascades/haarcascade_frontalface_default.xml');#}
+            const response = await fetch('/static/opencv/haarcascade_frontalface_default.xml');
             const buffer = await response.arrayBuffer();
             cv.FS_createDataFile('/', 'cascade.xml', new Uint8Array(buffer), true, false, false);
             classifier = new cv.CascadeClassifier();
@@ -513,10 +484,10 @@
     <script src="/static/js/adapter-latest.js"></script>
 {#    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>#}
 
-{#    <script src="/static/js/hands_solution_packed_assets_loader.js" crossorigin="anonymous"></script>#}
+    <script src="/static/js/hands_solution_packed_assets_loader.js" crossorigin="anonymous"></script>
 {#    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands_solution_packed_assets_loader.js" crossorigin="anonymous"></script>#}
 
-    {#    <script src="/static/js/hands_solution_simd_wasm_bin.js" crossorigin="anonymous"></script>#}
+    <script src="/static/js/hands_solution_simd_wasm_bin.js" crossorigin="anonymous"></script>
 {#    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands_solution_simd_wasm_bin.js" crossorigin="anonymous"></script>#}
 
     <script src="/static/main.js" async></script>

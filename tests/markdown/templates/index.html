@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown File Manager</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simplemde@1.11.2/dist/simplemde.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/simplemde@1.11.2/dist/simplemde.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            display: flex;
+        }
+        #directory {
+            width: 30%;
+            border-right: 1px solid #ccc;
+            padding-right: 20px;
+            overflow-y: auto;
+        }
+        #content {
+            width: 70%;
+            padding-left: 20px;
+        }
+        .folder, .file {
+            cursor: pointer;
+            margin: 5px 0;
+        }
+        .folder {
+            font-weight: bold;
+        }
+        .file:hover, .folder:hover {
+            color: blue;
+        }
+        .children {
+            margin-left: 20px;
+        }
+        #rendered-content {
+            display: block;
+        }
+        #editor-container {
+            display: none;
+        }
+        #edit-button, #save-button, #cancel-button {
+            margin-top: 10px;
+            margin-right: 10px;
+            padding: 8px 16px;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #edit-button {
+            background-color: #007bff;
+        }
+        #edit-button:hover {
+            background-color: #0056b3;
+        }
+        #save-button {
+            background-color: #4CAF50;
+        }
+        #save-button:hover {
+            background-color: #45a049;
+        }
+        #cancel-button {
+            background-color: #dc3545;
+        }
+        #cancel-button:hover {
+            background-color: #c82333;
+        }
+        .markdown-body {
+            box-sizing: border-box;
+            min-width: 200px;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+        #search-input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <div id="directory">
+        <h2>Directory</h2>
+        <input type="text" id="search-input" placeholder="Search files...">
+        <div id="directory-content">{{ structure | tojson | safe }}</div>
+    </div>
+    <div id="content">
+        <h2>File Content</h2>
+        <div id="rendered-content" class="markdown-body"></div>
+        <div id="editor-container">
+            <textarea id="editor"></textarea>
+        </div>
+        <button id="edit-button" style="display: none;">Edit</button>
+        <button id="save-button" style="display: none;">Save</button>
+        <button id="cancel-button" style="display: none;">Cancel</button>
+    </div>
+
+    <script>
+        // Initialize SimpleMDE editor (but don't show it initially)
+        let simplemde = null;
+        let currentFilePath = null;
+        let originalContent = ''; // Store original content for cancel functionality
+        const originalStructure = {{ structure | tojson | safe }};
+
+        // Function to render directory structure
+        function renderDirectory(structure, container, prefix = '') {
+            const ul = document.createElement('ul');
+            for (const [name, item] of Object.entries(structure)) {
+                const li = document.createElement('li');
+                li.className = item.type;
+                li.textContent = name;
+                if (item.type === 'file') {
+                    li.onclick = () => loadFile(item.path);
+                }
+                ul.appendChild(li);
+                if (item.type === 'folder' && Object.keys(item.children).length > 0) {
+                    const childrenContainer = document.createElement('div');
+                    childrenContainer.className = 'children';
+                    renderDirectory(item.children, childrenContainer, prefix + name + '/');
+                    li.appendChild(childrenContainer);
+                }
+            }
+            container.appendChild(ul);
+        }
+
+        // Filter directory structure based on search query
+        function filterDirectory(query) {
+            const filteredStructure = {};
+            query = query.toLowerCase();
+            for (const [name, item] of Object.entries(originalStructure)) {
+                if (item.type === 'folder') {
+                    const filteredChildren = filterChildren(item.children, query);
+                    if (Object.keys(filteredChildren).length > 0) {
+                        filteredStructure[name] = {
+                            type: 'folder',
+                            children: filteredChildren
+                        };
+                    }
+                } else if (item.type === 'file' && name.toLowerCase().includes(query)) {
+                    filteredStructure[name] = item;
+                }
+            }
+            return filteredStructure;
+        }
+
+        // Helper function to filter children recursively
+        function filterChildren(children, query) {
+            const filtered = {};
+            for (const [name, item] of Object.entries(children)) {
+                if (item.type === 'folder') {
+                    const filteredChildren = filterChildren(item.children, query);
+                    if (Object.keys(filteredChildren).length > 0) {
+                        filtered[name] = {
+                            type: 'folder',
+                            children: filteredChildren
+                        };
+                    }
+                } else if (item.type === 'file' && name.toLowerCase().includes(query)) {
+                    filtered[name] = item;
+                }
+            }
+            return filtered;
+        }
+
+        // Update directory display based on search
+        function updateDirectory() {
+            const query = document.getElementById('search-input').value;
+            const directoryContent = document.getElementById('directory-content');
+            directoryContent.innerHTML = '';
+            const structureToRender = query ? filterDirectory(query) : originalStructure;
+            renderDirectory(structureToRender, directoryContent);
+        }
+
+        // Load file content
+        function loadFile(filePath) {
+            currentFilePath = filePath;
+            fetch(`/file/${encodeURIComponent(filePath)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.content === "File not found or not indexed.") {
+                        document.getElementById('rendered-content').innerHTML = data.content;
+                        document.getElementById('edit-button').style.display = 'none';
+                        document.getElementById('save-button').style.display = 'none';
+                        document.getElementById('cancel-button').style.display = 'none';
+                        document.getElementById('editor-container').style.display = 'none';
+                        document.getElementById('rendered-content').style.display = 'block';
+                        return;
+                    }
+                    // Show rendered content by default
+                    document.getElementById('rendered-content').innerHTML = data.html;
+                    document.getElementById('rendered-content').style.display = 'block';
+                    document.getElementById('editor-container').style.display = 'none';
+                    document.getElementById('edit-button').style.display = 'block';
+                    document.getElementById('save-button').style.display = 'none';
+                    document.getElementById('cancel-button').style.display = 'none';
+                    // Initialize editor with raw content but keep it hidden
+                    if (!simplemde) {
+                        simplemde = new SimpleMDE({
+                            element: document.getElementById('editor'),
+                            spellChecker: false,
+                            status: false
+                        });
+                    }
+                    originalContent = data.content; // Store original content
+                    simplemde.value(data.content);
+                    // Re-highlight code blocks
+                    document.querySelectorAll('pre code').forEach(block => {
+                        hljs.highlightElement(block);
+                    });
+                })
+                .catch(error => console.error('Error loading file:', error));
+        }
+
+        // Toggle to edit mode
+        document.getElementById('edit-button').onclick = () => {
+            document.getElementById('rendered-content').style.display = 'none';
+            document.getElementById('editor-container').style.display = 'block';
+            document.getElementById('edit-button').style.display = 'none';
+            document.getElementById('save-button').style.display = 'inline-block';
+            document.getElementById('cancel-button').style.display = 'inline-block';
+            // Ensure editor shows raw markdown
+            if (simplemde) {
+                simplemde.value(originalContent); // Reset to original content
+            }
+        };
+
+        // Save file content
+        document.getElementById('save-button').onclick = () => {
+            if (!currentFilePath) return;
+            const content = simplemde.value();
+            fetch(`/save/${encodeURIComponent(currentFilePath)}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ content })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('File saved successfully!');
+                        // Reload file to show updated rendered content
+                        loadFile(currentFilePath);
+                    } else {
+                        alert('Error saving file.');
+                    }
+                })
+                .catch(error => console.error('Error saving file:', error));
+        };
+
+        // Cancel editing and return to rendered view
+        document.getElementById('cancel-button').onclick = () => {
+            if (!currentFilePath) return;
+            document.getElementById('rendered-content').style.display = 'block';
+            document.getElementById('editor-container').style.display = 'none';
+            document.getElementById('edit-button').style.display = 'block';
+            document.getElementById('save-button').style.display = 'none';
+            document.getElementById('cancel-button').style.display = 'none';
+            // Reset editor to original content
+            if (simplemde) {
+                simplemde.value(originalContent);
+            }
+        };
+
+        // Initialize directory rendering and search
+        const directoryDiv = document.getElementById('directory');
+        directoryDiv.innerHTML = '<h2>Directory</h2><input type="text" id="search-input" placeholder="Search files..."><div id="directory-content"></div>';
+        updateDirectory();
+
+        // Add search input event listener
+        document.getElementById('search-input').addEventListener('input', updateDirectory);
+
+        // Initialize highlight.js
+        hljs.highlightAll();
+    </script>
+</body>
+</html>

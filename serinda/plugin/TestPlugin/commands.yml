@@ -3,4 +3,3 @@ type: intent
 name: testPluginRun
 utterances:
   - run test plugin
-  - run test plugin# searchFlight Intent

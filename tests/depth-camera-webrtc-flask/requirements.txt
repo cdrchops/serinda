@@ -1,0 +1,7 @@
+flask
+flask-socketio
+eventlet
+aiortc
+opencv-python
+numpy
+av
