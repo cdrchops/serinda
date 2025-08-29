@@ -17,7 +17,10 @@ https://support.myownconference.com/en/article/setting-up-and-using-an-external-
 - [ ] Test hand gestures with new camera set up \
 - [ ] Maybe find a new gesture library as the one I'm using with WebRTC isn't working as well. \
 - [x] A gesture library hosted locally
-- [ ] https://mozilla.github.io/pdf.js/getting_started/#download
+- [x] Markdown editor and viewer
+- [x] PDF viewer and scroller - https://mozilla.github.io/pdf.js/getting_started/#download
+- [x] load LLMs and be able to search them and display results.  As well run them online or offline
+- [ ] Integrate the markdown editor and the pdf viewer into plugins 
 
 <h4>Research Links</h4>
 https://webrtc.org/ \

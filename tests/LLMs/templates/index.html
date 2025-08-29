@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>LLM Runner</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .row { margin-bottom: 12px; }
+    #answer { white-space: pre-wrap; border: 1px solid #ccc; padding: 10px; min-height: 160px; }
+    textarea { width: 100%; height: 120px; }
+    select { min-width: 320px; }
+    .status { color: #555; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <h2>Pluggable LLMs</h2>
+  <div class="row">
+    <label><input type="checkbox" id="offlineToggle" disabled> Offline mode</label>
+  </div>
+  <div class="row">
+    <select id="modelSelect"></select>
+    <button id="loadBtn">Load</button>
+    <span class="status" id="status"></span>
+  </div>
+  <div class="row">
+    <textarea id="prompt" placeholder="Ask a question..."></textarea>
+  </div>
+  <div class="row">
+    <button id="askBtn">Ask</button>
+  </div>
+  <div class="row">
+    <div id="answer"></div>
+  </div>
+
+<script>
+async function fetchModels(){
+  const res = await fetch('/api/models');
+  const data = await res.json();
+  document.getElementById('offlineToggle').checked = data.offline;
+  const sel = document.getElementById('modelSelect');
+  sel.innerHTML = '';
+  if (!data.models || data.models.length === 0){
+    const opt = document.createElement('option');
+    opt.textContent = 'No models found';
+    opt.value = '';
+    sel.appendChild(opt);
+    return;
+  }
+  data.models.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.id;
+    opt.textContent = m.name;
+    sel.appendChild(opt);
+  });
+}
+
+async function loadSelected(){
+  const model = document.getElementById('modelSelect').value;
+  if (!model){
+    alert('Select a model first');
+    return;
+  }
+  document.getElementById('status').textContent = 'Loading...';
+  const res = await fetch('/api/load', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({model})});
+  const data = await res.json();
+  if (data.error){
+    document.getElementById('status').textContent = 'Error: ' + data.error;
+  } else {
+    document.getElementById('status').textContent = 'Loaded ' + data.model + ' (' + data.provider + ')';
+  }
+}
+
+async function ask(){
+  const prompt = document.getElementById('prompt').value.trim();
+  if (!prompt){
+    alert('Type a prompt');
+    return;
+  }
+  document.getElementById('answer').textContent = 'Thinking...';
+  const res = await fetch('/api/ask', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({prompt})});
+  const data = await res.json();
+  if (data.error){
+    document.getElementById('answer').textContent = 'Error: ' + data.error;
+  } else {
+    document.getElementById('answer').textContent = data.answer;
+  }
+}
+
+document.getElementById('loadBtn').addEventListener('click', loadSelected);
+
+document.getElementById('askBtn').addEventListener('click', ask);
+
+fetchModels();
+</script>
+</body>
+</html>
