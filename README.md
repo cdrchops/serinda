@@ -22,6 +22,8 @@ https://support.myownconference.com/en/article/setting-up-and-using-an-external-
 - [x] load LLMs and be able to search them and display results.  As well run them online or offline
 - [ ] Integrate the markdown editor and the pdf viewer into plugins 
 - [x] Weather lookup and pollen lookup
+- [ ] Integrate weather lookups into a plugin
+- [ ] Maybe re-evaluate the plugins to see that they're what I want or how I want
 
 <h4>Research Links</h4>
 https://webrtc.org/ \
