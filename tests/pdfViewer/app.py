@@ -7,7 +7,8 @@ app = Flask(__name__)
 class PDFReader:
     def __init__(self, root_dir: str):
         """Initialize the PDFReader with the root directory to scan."""
-        self.root_dir = root_dir
+        # Use provided root_dir rather than a hard-coded path
+        self.root_dir = "c:/projects/guides/" # root_dir
         self.pdf_files: Dict[str, str] = {}  # rel_path: full_path
         self.index_files()
 
@@ -35,7 +36,6 @@ class PDFReader:
         return structure
 
 # Initialize PDFReader using env var or repo-relative default
-
 def _default_pdf_root() -> str:
     base_dir = os.path.dirname(os.path.abspath(__file__))
     content_dir = os.path.join(base_dir, 'content')
@@ -47,17 +47,23 @@ reader = PDFReader(PDF_ROOT)
 
 @app.route('/')
 def index():
-    """Render the main page with directory structure."""
+    """Render the main page with directory structure.
+    Re-index on each request so newly added/removed PDFs are reflected.
+    """
+    reader.index_files()
     structure = reader.get_directory_structure()
     return render_template('index.html', structure=structure)
 
 @app.route('/pdf/<path:rel_path>')
 def serve_pdf(rel_path):
     """Serve the PDF file securely."""
-    full_path = os.path.join(reader.root_dir, rel_path)
-    if not os.path.isfile(full_path):
+    # Prevent path traversal by normalizing and ensuring it's within root
+    requested = os.path.normpath(os.path.join(reader.root_dir, rel_path))
+    if not requested.startswith(os.path.abspath(reader.root_dir)):
+        return "Invalid path", 400
+    if not os.path.isfile(requested):
         return "File not found", 404
-    return send_file(full_path, mimetype='application/pdf')
+    return send_file(requested, mimetype='application/pdf')
 
 if __name__ == '__main__':
     app.run(debug=True)

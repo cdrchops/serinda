@@ -3,242 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF File Manager</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.82/pdf.min.mjs" type="module"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.17"></script>
+    <title>PDF Directory</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            display: flex;
-        }
-        #directory {
-            width: 30%;
-            border-right: 1px solid #ccc;
-            padding-right: 20px;
-            overflow-y: auto;
-        }
-        #content {
-            width: 70%;
-            padding-left: 20px;
-        }
-        .folder, .file {
-            cursor: pointer;
-            margin: 5px 0;
-        }
-        .folder {
-            font-weight: bold;
-        }
-        .file:hover, .folder:hover {
-            color: blue;
-        }
-        .children {
-            margin-left: 20px;
-        }
-        #pdf-container {
-            overflow-y: auto;
-            height: 80vh;
-            border: 1px solid #ccc;
-        }
-        #controls {
-            margin-bottom: 10px;
-        }
-        #video {
-            display: none;
-        }
-        #output_canvas {
-            display: none;
-        }
+        html, body { height: 100%; margin: 0; }
+        body { font-family: Arial, sans-serif; }
+        .container { display: flex; height: 100vh; }
+        .sidebar { width: 35%; max-width: 520px; min-width: 260px; border-right: 1px solid #ddd; overflow: auto; padding: 16px; }
+        .viewer { flex: 1; height: 100%; }
+        .viewer iframe { width: 100%; height: 100%; border: 0; }
+        .folder { font-weight: bold; cursor: pointer; }
+        .children { margin-left: 16px; }
+        ul { list-style: none; padding-left: 0; }
+        li { margin: 4px 0; }
+        a.file-link { color: #0b62d6; text-decoration: none; cursor: pointer; }
+        a.file-link:hover { text-decoration: underline; }
+        .muted { color: #777; font-weight: normal; }
     </style>
 </head>
 <body>
-    <div id="directory">
-        <h2>Directory</h2>
-        <div id="directory-content"></div>
-    </div>
-    <div id="content">
-        <h2>PDF Content</h2>
-        <div id="controls">
-            <button id="voice-toggle">Toggle Voice Control</button>
-            <button id="gesture-toggle">Toggle Gesture Control</button>
+    <div class="container">
+        <div class="sidebar">
+            <h2>PDF Directory</h2>
+            <div id="directory-content"></div>
         </div>
-        <div id="pdf-container"></div>
-        <video id="video" width="640" height="480" autoplay playsinline></video>
-        <canvas id="output_canvas" width="640" height="480"></canvas>
+        <div class="viewer">
+            <div id="controls" style="padding:8px; border-bottom:1px solid #ddd; display:flex; gap:8px; align-items:center;">
+                <button id="btnTop" title="Scroll to top">Top</button>
+                <label>Page:
+                    <input type="number" id="pageInput" min="1" style="width:72px" />
+                </label>
+                <button id="btnGoPage" title="Go to page">Go</button>
+                <button id="btnPrev" title="Previous page">Prev</button>
+                <button id="btnNext" title="Next page">Next</button>
+                <label>Scroll Y:
+                    <input type="number" id="scrollDelta" value="300" style="width:80px" />
+                </label>
+                <button id="btnScrollUp">Up</button>
+                <button id="btnScrollDown">Down</button>
+            </div>
+            <iframe id="pdfViewer" title="PDF Viewer"></iframe>
+        </div>
     </div>
 
-    <script type="module">
-        // PDF.js setup
-        import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.82/pdf.min.mjs';
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.82/pdf.worker.min.mjs';
-
-        // MediaPipe setup
-        const { GestureRecognizer, FilesetResolver } = window;
-
-        let gestureRecognizer;
-        let videoElement = document.getElementById('video');
-        let canvasElement = document.getElementById('output_canvas');
-        let canvasCtx = canvasElement.getContext('2d');
-        let lastGesture = '';
-        let gestureEnabled = false;
-
-        async function createGestureRecognizer() {
-            const vision = await FilesetResolver.forVisionTasks(
-                'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.17/wasm'
-            );
-            gestureRecognizer = await GestureRecognizer.createFromOptions(vision, {
-                baseOptions: {
-                    modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task',
-                    delegate: 'GPU'
-                },
-                runningMode: 'VIDEO',
-                numHands: 2
-            });
-        }
-
-        createGestureRecognizer();
-
-        async function enableCam() {
-            const constraints = { 'video': { facingMode: 'user' } };
-            navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
-                videoElement.srcObject = stream;
-                videoElement.addEventListener('loadeddata', predictWebcam);
-            });
-        }
-
-        let lastVideoTime = -1;
-        async function predictWebcam() {
-            if (!gestureEnabled) return;
-
-            let nowInMs = Date.now();
-            if (videoElement.currentTime !== lastVideoTime) {
-                lastVideoTime = videoElement.currentTime;
-                const results = await gestureRecognizer.recognizeForVideo(videoElement, nowInMs);
-                canvasCtx.save();
-                canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-                if (results.landmarks) {
-                    // Draw landmarks (optional)
-                    // For simplicity, omitted drawing code
-                }
-                if (results.gestures.length > 0) {
-                    const gesture = results.gestures[0][0].categoryName;
-                    if (gesture !== lastGesture) {
-                        lastGesture = gesture;
-                        handleGesture(gesture);
-                    }
-                } else {
-                    lastGesture = '';
-                }
-                canvasCtx.restore();
-            }
-            window.requestAnimationFrame(predictWebcam);
-        }
-
-        function handleGesture(gesture) {
-            const pdfContainer = document.getElementById('pdf-container');
-            if (gesture === 'thumb_up') {
-                pdfContainer.scrollBy(0, -200);  // Scroll up
-            } else if (gesture === 'thumb_down') {
-                pdfContainer.scrollBy(0, 200);  // Scroll down
-            }
-            // Add more gestures as needed, e.g., 'victory' for top, etc.
-        }
-
-        document.getElementById('gesture-toggle').onclick = () => {
-            gestureEnabled = !gestureEnabled;
-            if (gestureEnabled) {
-                enableCam();
-                // videoElement.style.display = 'block'; // Optional: show video
-            } else {
-                // Stop stream if needed
-                if (videoElement.srcObject) {
-                    videoElement.srcObject.getTracks().forEach(track => track.stop());
-                }
-                // videoElement.style.display = 'none';
-            }
-        };
-
-        // Voice control setup
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const recognition = new SpeechRecognition();
-        recognition.continuous = true;
-        recognition.interimResults = false;
-        recognition.lang = 'en-US';
-
-        let voiceEnabled = false;
-
-        recognition.onresult = (event) => {
-            const command = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
-            handleVoiceCommand(command);
-        };
-
-        function handleVoiceCommand(command) {
-            const pdfContainer = document.getElementById('pdf-container');
-            if (command.includes('scroll down')) {
-                pdfContainer.scrollBy(0, 200);
-            } else if (command.includes('scroll up')) {
-                pdfContainer.scrollBy(0, -200);
-            } else if (command.includes('go to top')) {
-                pdfContainer.scrollTop = 0;
-            } else if (command.includes('go to bottom')) {
-                pdfContainer.scrollTop = pdfContainer.scrollHeight;
-            }
-            // Add more commands as needed
-        }
-
-        document.getElementById('voice-toggle').onclick = () => {
-            voiceEnabled = !voiceEnabled;
-            if (voiceEnabled) {
-                recognition.start();
-            } else {
-                recognition.stop();
-            }
-        };
-
-        // Directory structure
+    <script>
+        // Directory structure from server
         const structure = {{ structure | tojson | safe }};
 
-        function renderDirectory(structure, container) {
+        // Build nested list with clickable links
+        function renderDirectory(structure, container, pathPrefix = '') {
             const ul = document.createElement('ul');
             for (const [name, item] of Object.entries(structure)) {
                 const li = document.createElement('li');
                 li.className = item.type;
-                li.textContent = name;
                 if (item.type === 'file') {
-                    li.onclick = () => loadPDF(item.path);
-                }
-                ul.appendChild(li);
-                if (item.type === 'folder' && Object.keys(item.children).length > 0) {
+                    const a = document.createElement('a');
+                    a.className = 'file-link';
+                    a.textContent = name;
+                    // The server expects rel_path for /pdf/<rel_path>
+                    const relPath = item.path; // already relative to root
+                    a.href = '#';
+                    a.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        openInViewer(relPath);
+                    });
+                    li.appendChild(a);
+                } else if (item.type === 'folder') {
+                    const header = document.createElement('span');
+                    header.textContent = name;
+                    header.className = 'folder';
                     const childrenContainer = document.createElement('div');
                     childrenContainer.className = 'children';
-                    renderDirectory(item.children, childrenContainer);
+                    if (item.children && Object.keys(item.children).length > 0) {
+                        renderDirectory(item.children, childrenContainer, pathPrefix + name + '/');
+                    } else {
+                        const empty = document.createElement('div');
+                        empty.className = 'muted';
+                        empty.textContent = '(empty)';
+                        childrenContainer.appendChild(empty);
+                    }
+                    li.appendChild(header);
                     li.appendChild(childrenContainer);
                 }
+                ul.appendChild(li);
             }
             container.appendChild(ul);
         }
 
-        async function loadPDF(relPath) {
-            const pdfContainer = document.getElementById('pdf-container');
-            pdfContainer.innerHTML = '';
-            const loadingTask = pdfjsLib.getDocument('/pdf/' + encodeURIComponent(relPath));
-            const pdf = await loadingTask.promise;
-            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-                const page = await pdf.getPage(pageNum);
-                const viewport = page.getViewport({ scale: 1.5 });
-                const canvas = document.createElement('canvas');
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
-                const renderContext = {
-                    canvasContext: canvas.getContext('2d'),
-                    viewport: viewport
-                };
-                await page.render(renderContext).promise;
-                pdfContainer.appendChild(canvas);
+        // --- Programmatic control helpers for PDF.js viewer ---
+        let viewerReadyPromise = null;
+        function getViewerAppAsync() {
+            if (!viewerReadyPromise) {
+                viewerReadyPromise = new Promise((resolve) => {
+                    const iframe = document.getElementById('pdfViewer');
+                    const wait = () => {
+                        try {
+                            const w = iframe.contentWindow;
+                            if (w && w.PDFViewerApplication && w.PDFViewerApplication.initializedPromise) {
+                                w.PDFViewerApplication.initializedPromise.then(() => resolve(w.PDFViewerApplication));
+                                return;
+                            }
+                        } catch (e) { /* same-origin only; our setup is same-origin */ }
+                        setTimeout(wait, 100);
+                    };
+                    wait();
+                });
             }
+            return viewerReadyPromise;
+        }
+        async function scrollToPage(n) {
+            const app = await getViewerAppAsync();
+            const max = app.pdfDocument ? app.pdfDocument.numPages : null;
+            const pageNum = Math.max(1, max ? Math.min(n, max) : n);
+            app.page = pageNum; // jumps and scrolls to that page
+        }
+        async function nextPage() { const app = await getViewerAppAsync(); app.page = Math.min(app.page + 1, app.pdfDocument.numPages); }
+        async function prevPage() { const app = await getViewerAppAsync(); app.page = Math.max(app.page - 1, 1); }
+        async function scrollByDelta(deltaY) {
+            const app = await getViewerAppAsync();
+            const container = app.pdfViewer && app.pdfViewer.container;
+            if (container) container.scrollTop += deltaY;
+        }
+        async function scrollToTop() {
+            const app = await getViewerAppAsync();
+            const container = app.pdfViewer && app.pdfViewer.container;
+            if (container) container.scrollTop = 0;
+        }
+        function openInViewer(relPath) {
+            // Use the existing PDF.js viewer if present in /static/js/pdfjs or fall back to native iframe
+            // Prefer bundled PDF.js in project root static/js/pdfjs/web/viewer.html, served by Flask static.
+            // We need a URL that the iframe can reach. Our Flask app serves PDFs at /pdf/<rel_path>.
+            const fileUrl = encodeURIComponent(`/pdf/${relPath}`);
+            const viewerPaths = [
+                '/static/js/pdfjs/web/viewer.html?file=', // project root static
+                // fallback to direct PDF (browser viewer)
+                null
+            ];
+            const iframe = document.getElementById('pdfViewer');
+
+            // Try PDF.js first; if it fails to load, fall back
+            const tryPdfJs = () => {
+                iframe.src = viewerPaths[0] + fileUrl;
+            };
+            const fallbackDirect = () => {
+                iframe.src = `/pdf/${relPath}`;
+            };
+
+            // Attempt PDF.js; after load, we keep it. On error, fallback.
+            iframe.onload = () => {
+                // Clear cached promise so getViewerAppAsync will attach to new document
+                viewerReadyPromise = null;
+                // Optionally set the page input to 1
+                const pageInput = document.getElementById('pageInput');
+                if (pageInput) pageInput.value = 1;
+            };
+            iframe.onerror = null;
+            tryPdfJs();
+            // If PDF.js isn't available (404), fallback could be using direct URL:
+            // iframe.src = `/pdf/${relPath}`;
         }
 
-        // Initialize directory
+        // Wire up control buttons
+        window.addEventListener('DOMContentLoaded', () => {
+            const btnTop = document.getElementById('btnTop');
+            const btnGoPage = document.getElementById('btnGoPage');
+            const btnPrev = document.getElementById('btnPrev');
+            const btnNext = document.getElementById('btnNext');
+            const btnUp = document.getElementById('btnScrollUp');
+            const btnDown = document.getElementById('btnScrollDown');
+            const pageInput = document.getElementById('pageInput');
+            const scrollDelta = document.getElementById('scrollDelta');
+            if (btnTop) btnTop.onclick = () => scrollToTop();
+            if (btnGoPage) btnGoPage.onclick = () => { const n = parseInt(pageInput.value || '1', 10); scrollToPage(n); };
+            if (btnPrev) btnPrev.onclick = () => prevPage();
+            if (btnNext) btnNext.onclick = () => nextPage();
+            if (btnUp) btnUp.onclick = () => { const d = parseInt(scrollDelta.value || '300', 10); scrollByDelta(-Math.abs(d)); };
+            if (btnDown) btnDown.onclick = () => { const d = parseInt(scrollDelta.value || '300', 10); scrollByDelta(Math.abs(d)); };
+        });
+
         const directoryContent = document.getElementById('directory-content');
         renderDirectory(structure, directoryContent);
     </script>

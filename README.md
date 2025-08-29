@@ -17,6 +17,7 @@ https://support.myownconference.com/en/article/setting-up-and-using-an-external-
 - [ ] Test hand gestures with new camera set up \
 - [ ] Maybe find a new gesture library as the one I'm using with WebRTC isn't working as well. \
 - [x] A gesture library hosted locally
+- [ ] https://mozilla.github.io/pdf.js/getting_started/#download
 
 <h4>Research Links</h4>
 https://webrtc.org/ \
@@ -26,7 +27,6 @@ https://www.google.com/search?q=deepseek+offline&rlz=1C1UEAD_enUS1165US1166&oq=d
 https://stackoverflow.com/questions/24514936/how-can-i-serve-npm-packages-using-flask \
 https://pypi.org/project/Flask-Fanstatic/ \
 https://www.fanstatic.org/en/latest/intro.html \
-https://www.google.com/search?q=deepseek+offline&rlz=1C1UEAD_enUS1165US1166&oq=deepseek+offline&gs_lcrp=EgZjaHJvbWUqBwgAEAAYgAQyBwgAEAAYgAQyBwgBEAAYgAQyBwgCEAAYgAQyBwgDEAAYgAQyBwgEEAAYgAQyBwgFEAAYgAQyBwgGEAAYgAQyBwgHEAAYgAQyBwgIEAAYgAQyBwgJEAAYgATSAQg0NTQ4ajBqN6gCALACAA&sourceid=chrome&ie=UTF-8 \
 https://cdn.jsdelivr.net/npm/@mediapipe/hands/
 
 <h2>What is SERINDA?</h2>
