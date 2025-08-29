@@ -21,6 +21,7 @@ https://support.myownconference.com/en/article/setting-up-and-using-an-external-
 - [x] PDF viewer and scroller - https://mozilla.github.io/pdf.js/getting_started/#download
 - [x] load LLMs and be able to search them and display results.  As well run them online or offline
 - [ ] Integrate the markdown editor and the pdf viewer into plugins 
+- [x] Weather lookup and pollen lookup
 
 <h4>Research Links</h4>
 https://webrtc.org/ \

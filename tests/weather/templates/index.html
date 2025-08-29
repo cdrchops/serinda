@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather & Pollen Lookup</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2rem; }
+    .row { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .card { border: 1px solid #ccc; border-radius: 8px; padding: 1rem; margin-top: 1rem; min-width: 260px; }
+    .actions a { display: inline-block; margin: 0.25rem 0.25rem; padding: 0.4rem 0.6rem; border: 1px solid #0078d7; color: #0078d7; text-decoration: none; border-radius: 4px; }
+    .actions a:hover { background: #0078d7; color: white; }
+    .error { color: #b00020; }
+    pre { background: #f7f7f7; padding: 0.5rem; border-radius: 4px; overflow: auto; }
+    form { margin-bottom: 1rem; }
+    input[type="text"] { padding: 0.4rem; font-size: 1rem; width: 140px; }
+    button { padding: 0.45rem 0.7rem; }
+  </style>
+</head>
+<body>
+  <h1>Weather & Pollen Lookup</h1>
+
+  <form method="get" action="/">
+    <label for="zip">ZIP Code:</label>
+    <input type="text" id="zip" name="zip" value="{{ zip_code or '' }}" placeholder="e.g. 10001" />
+    <button type="submit">Set ZIP</button>
+  </form>
+
+  {% if error %}
+  <div class="error">Error: {{ error }}</div>
+  {% endif %}
+
+  <div class="row">
+    <div class="card">
+      <h3>Weather</h3>
+      <div class="actions">
+        <a href="/?zip={{ zip_code }}&action=today">Today's Weather</a>
+        <a href="/?zip={{ zip_code }}&action=week">Weekly Forecast</a>
+        <a href="/?zip={{ zip_code }}&action=high_today">High Temp Today</a>
+        <a href="/?zip={{ zip_code }}&action=high_tomorrow">High Temp Tomorrow</a>
+        <a href="/?zip={{ zip_code }}&action=low_today">Low Temp Today</a>
+        <a href="/?zip={{ zip_code }}&action=low_tomorrow">Low Temp Tomorrow</a>
+        <a href="/?zip={{ zip_code }}&action=heat_today">Heat Index Today</a>
+        <a href="/?zip={{ zip_code }}&action=heat_tomorrow">Heat Index Tomorrow</a>
+        <a href="/?zip={{ zip_code }}&action=chill_today">Wind Chill Today</a>
+        <a href="/?zip={{ zip_code }}&action=chill_tomorrow">Wind Chill Tomorrow</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Pollen</h3>
+      <div class="actions">
+        <a href="/?zip={{ zip_code }}&action=pollen_today">Pollen Today</a>
+        <a href="/?zip={{ zip_code }}&action=pollen_tomorrow">Pollen Tomorrow</a>
+        <a href="/?zip={{ zip_code }}&action=pollen_week">Pollen Week</a>
+      </div>
+      <p style="font-size: 0.9rem; color: #444;">Tip: Set AMBEE_API_KEY in environment to see live pollen data; otherwise a stub message will be shown.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Result</h3>
+    {% if result %}
+      <pre>{{ result | tojson(indent=2) }}</pre>
+    {% else %}
+      <p>Enter a ZIP and choose a command to see results.</p>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h3>API Links</h3>
+    <ul>
+      <li><a href="/api/weather/today?zip={{ zip_code }}">/api/weather/today</a></li>
+      <li><a href="/api/weather/week?zip={{ zip_code }}">/api/weather/week</a></li>
+      <li><a href="/api/weather/high_today?zip={{ zip_code }}">/api/weather/high_today</a></li>
+      <li><a href="/api/weather/high_tomorrow?zip={{ zip_code }}">/api/weather/high_tomorrow</a></li>
+      <li><a href="/api/weather/low_today?zip={{ zip_code }}">/api/weather/low_today</a></li>
+      <li><a href="/api/weather/low_tomorrow?zip={{ zip_code }}">/api/weather/low_tomorrow</a></li>
+      <li><a href="/api/weather/heat_today?zip={{ zip_code }}">/api/weather/heat_today</a></li>
+      <li><a href="/api/weather/heat_tomorrow?zip={{ zip_code }}">/api/weather/heat_tomorrow</a></li>
+      <li><a href="/api/weather/chill_today?zip={{ zip_code }}">/api/weather/chill_today</a></li>
+      <li><a href="/api/weather/chill_tomorrow?zip={{ zip_code }}">/api/weather/chill_tomorrow</a></li>
+      <li><a href="/api/pollen/today?zip={{ zip_code }}">/api/pollen/today</a></li>
+      <li><a href="/api/pollen/tomorrow?zip={{ zip_code }}">/api/pollen/tomorrow</a></li>
+      <li><a href="/api/pollen/week?zip={{ zip_code }}">/api/pollen/week</a></li>
+    </ul>
+  </div>
+</body>
+</html>
