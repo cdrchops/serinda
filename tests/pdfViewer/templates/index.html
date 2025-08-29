@@ -27,7 +27,8 @@
             <div id="directory-content"></div>
         </div>
         <div class="viewer">
-            <div id="controls" style="padding:8px; border-bottom:1px solid #ddd; display:flex; gap:8px; align-items:center;">
+            <div id="controls" style="padding:8px; border-bottom:1px solid #ddd; display:none; gap:8px; align-items:center;">
+                <button id="btnClose" title="Close current PDF">Close</button>
                 <button id="btnTop" title="Scroll to top">Top</button>
                 <label>Page:
                     <input type="number" id="pageInput" min="1" style="width:72px" />
@@ -155,6 +156,9 @@
                 // Optionally set the page input to 1
                 const pageInput = document.getElementById('pageInput');
                 if (pageInput) pageInput.value = 1;
+                // Ensure controls are visible when a PDF is open
+                const controls = document.getElementById('controls');
+                if (controls) controls.style.display = 'flex';
             };
             iframe.onerror = null;
             tryPdfJs();
@@ -164,6 +168,7 @@
 
         // Wire up control buttons
         window.addEventListener('DOMContentLoaded', () => {
+            const btnClose = document.getElementById('btnClose');
             const btnTop = document.getElementById('btnTop');
             const btnGoPage = document.getElementById('btnGoPage');
             const btnPrev = document.getElementById('btnPrev');
@@ -172,6 +177,16 @@
             const btnDown = document.getElementById('btnScrollDown');
             const pageInput = document.getElementById('pageInput');
             const scrollDelta = document.getElementById('scrollDelta');
+            if (btnClose) btnClose.onclick = () => {
+                const iframe = document.getElementById('pdfViewer');
+                const controls = document.getElementById('controls');
+                // Blank the iframe to hide the PDF
+                iframe.removeAttribute('src');
+                // Optionally collapse controls when no PDF is open
+                if (controls) controls.style.display = 'none';
+                // Also reset any pending viewerReadyPromise to avoid dangling references
+                viewerReadyPromise = null;
+            };
             if (btnTop) btnTop.onclick = () => scrollToTop();
             if (btnGoPage) btnGoPage.onclick = () => { const n = parseInt(pageInput.value || '1', 10); scrollToPage(n); };
             if (btnPrev) btnPrev.onclick = () => prevPage();
